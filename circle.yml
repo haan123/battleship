@@ -1,0 +1,9 @@
+machine:
+  node:
+      version: 8.4.0
+deployment:
+  staging:
+    branch: master
+    heroku:
+      appname: caro4fun
+

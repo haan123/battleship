@@ -1,0 +1,11 @@
+.board-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.board--baseship {
+  width: 400px;
+  height: 400px;
+  background: url("../../assets/base-ship.png");
+  background-size: 400px 400px;
+}

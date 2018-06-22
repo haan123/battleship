@@ -6,18 +6,28 @@
 
 class Ship {
   constructor(options) {
-    const { bluePrint, position } = options;
+    const { name, bluePrint, position } = options;
 
     this.buildShip(bluePrint);
 
+    this.name = name;
     this.damage = 0;
-    this.isDestroyed = false;
     this.position = position;
+  }
+
+  getFired(coordinate) {
+    for (let i = 0; i < this.decker; i++) {
+      if (this.position[i] === coordinate) {
+        console.log(`${this.name} is hitted at ${coordinate}`);
+        this.setHit();
+        break;
+      }
+    }
   }
 
   buildShip(bluePrint) {
     Object.keys(bluePrint).map((prop) => {
-      this.prop = bluePrint[prop];
+      this[prop] = bluePrint[prop];
     });
   }
 

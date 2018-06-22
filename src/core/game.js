@@ -8,14 +8,14 @@ import Ship from './ship';
 
 const ARRANGER = {
   horrizontal: {
-    row: row => row,
-    col: col => ++col
+    x: x => x,
+    y: y => ++y
   },
   vertical: {
-    row: row => ++row,
-    col: col => col
+    x: x => --x,
+    y: y => y
   }
-}
+};
 
 const SHIP_TYPE = {
   aircraftCarrier: {
@@ -47,35 +47,58 @@ const SHIP_TYPE = {
 class Game {
   constructor(options) {
     this.cells = {};
-    this.ships = {};
+    this.ships = [];
 
     this.createGrid(options);
   }
 
   addShip({ type, coordinate, arrange }) {
     const shipType = SHIP_TYPE[type];
-    const bluePrint = shipType.bluePrint;
+    const { bluePrint } = shipType;
 
     const position = this.getPosition(coordinate, ARRANGER[arrange], bluePrint.decker);
 
     const ship = new Ship({
+      name: `${type}-${+new Date()}`,
       bluePrint,
       position
     });
 
+    this.ships.push(ship);
+  }
+
+  fire(coordinate) {
+
+  }
+
+  getFired(coordinate) {
+    this.ships.map((ship, index) => {
+      const { position } = ship;
+
+      ship.getFired(coordinate);
+
+      if (ship.isDestroyed()) {
+        console.log(`${ship.name} is destroyed`);
+        this.ships.splice(index, 1);
+      }
+    });
+  }
+
+  isLost() {
+    return !!this.ships.length;
   }
 
   getPosition(coordinate, arrange, decker) {
-    let { row, col } = this.parseCoord(coordinate);
-    let pos = [coordinate];
+    let { x, y } = this.parseCoord(coordinate);
+    const pos = [coordinate];
 
-    Object.keys(arrange).map((name) => {
-      row = arrange.row(row);
-      col = arrange.col(col);
+    for (let i = 1; i < decker; i++) {
+      x = arrange.x(x);
+      y = arrange.y(y);
 
-      const nextCoor = this.createCoord(row, col);
+      const nextCoor = this.createCoord(x, y);
       pos.push(nextCoor);
-    })
+    }
 
     return pos;
   }
@@ -84,19 +107,19 @@ class Game {
     // this.reset();
   }
 
-  createCoord(row, col) {
-    return `${row}:${col}`;
+  createCoord(x, y) {
+    return `${x}:${y}`;
   }
 
   parseCoord(coordinate) {
-    let [row, col] = coordinate.split(':');
+    let [x, y] = coordinate.split(':');
 
-    row = +row;
-    col = +col;
+    x = +x;
+    y = +y;
 
     return {
-      row,
-      col
+      x,
+      y
     };
   }
 

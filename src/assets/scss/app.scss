@@ -1,31 +1,36 @@
+@import 'components/components.board';
+@import 'components/components.ship';
+
 body {
   background: #1f6fc5;
 }
-table {
-  table-layout: fixed;
+.table {
   margin: 0 auto;
-  border-collapse: collapse;
   font-size: 25px;
   color: #E8104A;
 }
 
-tr, td {
+
+.row {
+  display: flex;
+
+}
+.row, .col {
   margin: 0;
   padding: 0;
 
   &:last-child {
-    td {
+    .col {
       border-bottom: 0;
     }
   }
 }
 
-td {
-  background: #13569e;
-  border-right: 2px solid #1f6fc5;
-  border-bottom: 2px solid #1f6fc5;
+.col {
+  background: #6da1ae;
+  border-right: 1px solid #82eaee;
+  border-bottom: 1px solid #82eaee;
   cursor: pointer;
-  border-radius: 8px;
 
   &:last-child {
     border-right: 0;
@@ -47,8 +52,8 @@ td {
 }
 
 .board {
+  position: relative;
   margin: 0 auto;
-  padding: 16px;
   overflow: auto;
 }
 

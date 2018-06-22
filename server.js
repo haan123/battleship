@@ -47,7 +47,7 @@ io.on('connection', function (socket) {
 
   socket.on('fire', function (data) {
     console.log('fire', data)
-    io.sockets.emit('enemyFiring', data)
+    io.sockets.emit('getFired', data)
   })
 
   socket.on('setupGame', function (data) {

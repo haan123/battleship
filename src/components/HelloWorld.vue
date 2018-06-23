@@ -6,8 +6,6 @@
 
     <div class="board-container">
       <div class="board" v-bind:style="{ width: `${40 * colNo}px` }">
-        <draggable :options="{group:'people'}" @start="drag=true" @end="drag=false">
-        </draggable>
         <div class="table">
           <div class="row" v-for="(_, row) in rowNo" :key="row">
             <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`${row}:${col}`" :data-cell="`${row}:${col}`" v-bind:class="{
@@ -37,19 +35,17 @@
       </div>
 
       <div class="board board--baseship">
-        <draggable :options="{group:'people'}" @start="drag=true" @end="drag=false">
-          <img class="ship aircraft-carrier" src="../assets/aircraftCarrier.png" v-bind:ref="`aircraftCarrier`"/>
-          <img class="ship battleship-1" src="../assets/battleship.png" v-bind:ref="`battleship`"/>
-          <img class="ship battleship-2" src="../assets/battleship.png" v-bind:ref="`battleship`"/>
-          <img class="ship destroyer-1" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
-          <img class="ship destroyer-2" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
-          <img class="ship destroyer-3" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
-          <img class="ship cruiser-1" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-          <img class="ship cruiser-2" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-          <img class="ship cruiser-3" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-          <img class="ship cruiser-4" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-          <img class="ship cruiser-5" src="../assets/cruiser.png" v-bind:ref="`destroyer`"/>
-        </draggable>
+        <img v-draggable="draggableValue" class="ship aircraft-carrier" src="../assets/aircraftCarrier.png" v-bind:ref="`aircraftCarrier`"/>
+        <img class="ship battleship-1" src="../assets/battleship.png" v-bind:ref="`battleship`"/>
+        <img class="ship battleship-2" src="../assets/battleship.png" v-bind:ref="`battleship`"/>
+        <img class="ship destroyer-1" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
+        <img class="ship destroyer-2" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
+        <img class="ship destroyer-3" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
+        <img class="ship cruiser-1" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
+        <img class="ship cruiser-2" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
+        <img class="ship cruiser-3" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
+        <img class="ship cruiser-4" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
+        <img class="ship cruiser-5" src="../assets/cruiser.png" v-bind:ref="`destroyer`"/>
       </div>
     </div>
 
@@ -63,7 +59,7 @@
 /* eslint consistent-return: 0 */
 /* eslint array-callback-return: 0 */
 
-import draggable from 'vuedraggable';
+import { Draggable } from '../core/draggable';
 import Game from '../core/game';
 // import WinnerModal from './WinnerModal';
 // import LooseModal from './LooseModal';
@@ -78,7 +74,10 @@ const socket = io(window.SOCKET_URL);
 export default {
   name: 'HelloWorld',
   components: {
-    draggable
+  },
+
+  directives: {
+    Draggable
   },
 
   data() {
@@ -117,7 +116,10 @@ export default {
       game: this.game,
       rowNo,
       colNo,
-      cells: this.game.cells
+      cells: this.game.cells,
+      draggableValue: {
+        onPositionChange: this.onPosChanged
+      }
     };
   },
 
@@ -125,6 +127,9 @@ export default {
   },
 
   methods: {
+    onPosChanged(positionDiff, absolutePosition, event) {
+    },
+
     newGame() {
       modal.showModal('user-config-modal');
     },

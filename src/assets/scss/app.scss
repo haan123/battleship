@@ -37,12 +37,12 @@ body {
   }
 
   &:hover {
-    background: #0f4a8a;
+    background: #618b96;
   }
 
   &.is-current,
   &.is-win {
-    background: #0f4a8a;
+    background: #618b96;
   }
 }
 
@@ -52,7 +52,6 @@ body {
 }
 
 .board {
-  position: relative;
   margin: 0 auto;
   overflow: auto;
 }

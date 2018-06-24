@@ -1,10 +1,39 @@
 .ship {
   position: absolute;
+  background-repeat: no-repeat;
 }
 
-.aircraft-carrier {
+.aircraft-carrier-1 {
+  width: 41px;
+  height: 160px;
   top: 208px;
   left: 36px;
+  background-image: url('../../assets/aircraftCarrier.png');
+}
+
+.battleship-1,
+.battleship-2 {
+  width: 37px;
+  height: 120px;
+  background-image: url('../../assets/battleship.png');
+}
+
+.destroyer-1,
+.destroyer-2,
+.destroyer-3 {
+  width: 26px;
+  height: 80px;
+  background-image: url('../../assets/destroyer.png');
+}
+
+.cruiser-1,
+.cruiser-2,
+.cruiser-3,
+.cruiser-4,
+.cruiser-5 {
+  width: 22px;
+  height: 42px;
+  background-image: url('../../assets/cruiser.png');
 }
 
 .battleship-1 {

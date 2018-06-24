@@ -4,11 +4,11 @@
       <button v-on:click="newGame" class="btn btn-danger btn-lg play">New Game</button>
     </div>
 
-    <div class="board-container">
+    <div id="board-container" class="board-container">
       <div class="board" v-bind:style="{ width: `${40 * colNo}px` }">
         <div class="table">
           <div class="row" v-for="(_, row) in rowNo" :key="row">
-            <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`${row}:${col}`" :data-cell="`${row}:${col}`" v-bind:class="{
+            <div class="droppable" v-for="(_, col) in colNo" :key="col" v-bind:ref="`map[${row}:${col}]`" :data-cell="`${row}:${col}`" v-bind:class="{
               'col': true,
               'is-win': cells[`${row}:${col}`].isWin,
               'is-current': cells[`${row}:${col}`].isCurrent
@@ -20,11 +20,11 @@
 
       <div class="board" v-bind:style="{
         width: `${40 * colNo}px`,
-        display: 'none'
+        display: 'block'
       }">
         <div class="table">
           <div class="row" v-for="(_, row) in rowNo" :key="row">
-            <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`${row}:${col}`" v-on:click="fire" :data-cell="`${row}:${col}`" v-bind:class="{
+            <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`act[${row}:${col}]`" v-on:click="fire" :data-cell="`${row}:${col}`" v-bind:class="{
                 'col': true,
                 'is-win': cells[`${row}:${col}`].isWin,
                 'is-current': cells[`${row}:${col}`].isCurrent
@@ -35,17 +35,9 @@
       </div>
 
       <div class="board board--baseship">
-        <img v-draggable="draggableValue" class="ship aircraft-carrier" src="../assets/aircraftCarrier.png" v-bind:ref="`aircraftCarrier`"/>
-        <img class="ship battleship-1" src="../assets/battleship.png" v-bind:ref="`battleship`"/>
-        <img class="ship battleship-2" src="../assets/battleship.png" v-bind:ref="`battleship`"/>
-        <img class="ship destroyer-1" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
-        <img class="ship destroyer-2" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
-        <img class="ship destroyer-3" src="../assets/destroyer.png" v-bind:ref="`destroyer`"/>
-        <img class="ship cruiser-1" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-        <img class="ship cruiser-2" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-        <img class="ship cruiser-3" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-        <img class="ship cruiser-4" src="../assets/cruiser.png" v-bind:ref="`cruiser`"/>
-        <img class="ship cruiser-5" src="../assets/cruiser.png" v-bind:ref="`destroyer`"/>
+        <template v-for="ship in ships">
+          <div :key="ship.name" v-draggable="ship.draggable" :class="`ship ${ship.name}`" :data-ship-name="ship.name" ></div>
+        </template>
       </div>
     </div>
 
@@ -99,11 +91,11 @@ export default {
       colNo
     });
 
-    this.game.addShip({
-      type: 'aircraftCarrier',
-      coordinate: '4:4',
-      arrange: 'vertical'
-    });
+    // this.game.addShip({
+    //   type: 'aircraftCarrier',
+    //   coordinate: '4:4',
+    //   arrange: 'vertical'
+    // });
 
     this.game.setup({
       isMyTurn: true
@@ -112,14 +104,21 @@ export default {
     socket.emit('setupGame', {
     });
 
+    const ships = this.game.ships.map((ship) => {
+      ship.draggable = {
+        onDragEnd: this.dragEnd,
+        resetInitialPos: false
+      }
+
+      return ship;
+    });
+
     return {
       game: this.game,
       rowNo,
       colNo,
       cells: this.game.cells,
-      draggableValue: {
-        onPositionChange: this.onPosChanged
-      }
+      ships
     };
   },
 
@@ -127,7 +126,58 @@ export default {
   },
 
   methods: {
-    onPosChanged(positionDiff, absolutePosition, event) {
+    getMapCell(coord) {
+      return this.$refs[`map[${this.game.createCoord(coord.x, coord.y)}]`][0];
+    },
+
+    getActCell(coord) {
+      return this.$refs[`act[${this.game.createCoord(coord.x, coord.y)}]`][0];
+    },
+
+    dragEnd(elem, event) {
+      const shipName = event.dragElem.getAttribute('data-ship-name');
+      const ship = this.game.getShip(shipName);
+
+      if (elem.closest('.droppable')) {
+        const cell = elem.getAttribute('data-cell');
+        const coord = this.game.parseCoord(cell);
+        const dragELemRect = event.getRectPosition();
+        const dropElemWidth = elem.clientWidth;
+        const dropElemHeight = elem.clientHeight;
+        const dragElemWidth = event.dragElem.clientWidth;
+
+        let dropELemRect = event.getRectPosition(elem);
+
+        if ((dragELemRect.left - dropELemRect.left) / dropElemWidth > 0.7) {
+          coord.y += 1;
+        }
+
+        if ((dragELemRect.top - dropELemRect.top) / dropElemHeight > 0.7) {
+          coord.x += 1;
+        }
+
+        elem = this.getMapCell(coord);
+        dropELemRect = event.getRectPosition(elem);
+
+        const dx = (elem.clientWidth / 2) - (event.dragElem.clientWidth / 2);
+
+        event.dragElem.style.left = `${dropELemRect.left + dx}px`;
+        event.dragElem.style.top = `${dropELemRect.top}px`;
+
+        event.setState({
+          initialMousePos: undefined,
+          startDragPosition: dropELemRect,
+          currentDragPosition: dropELemRect
+        });
+
+        ship.setPosition(coord);
+      } else {
+        ship.draggable.resetInitialPos = true;
+
+        setTimeout(() => {
+            ship.draggable.resetInitialPos = false;
+        }, 0);
+      }
     },
 
     newGame() {

@@ -88,6 +88,7 @@ export const Draggable = {
       return;
     }
 
+    let currentDroppable = null;
     const handler =
       (binding.value && binding.value.handle && extractHandle(binding.value.handle)) || el;
 
@@ -104,8 +105,9 @@ export const Draggable = {
       handler.setAttribute('draggable-state', JSON.stringify(state));
     }
 
-    function getRectPosition() {
-      const clientRect = el.getBoundingClientRect();
+    function getRectPosition(elem) {
+      elem = elem || el;
+      const clientRect = elem.getBoundingClientRect();
       if (!clientRect.height || !clientRect.width) {
         return;
       }
@@ -124,7 +126,7 @@ export const Draggable = {
       if (!state.currentDragPosition) {
         return;
       }
-      el.style.position = 'fixed';
+      el.style.position = 'absolute';
       el.style.left = `${state.currentDragPosition.left}px`;
       el.style.top = `${state.currentDragPosition.top}px`;
     }
@@ -155,6 +157,31 @@ export const Draggable = {
         posDiff.y = state.currentDragPosition.top - state.startDragPosition.top;
       }
       const currentPosition = state.currentDragPosition && { ...state.currentDragPosition };
+
+      if (currentPosition) {
+        el.hidden = true;
+        const elemBelow =
+          document.elementFromPoint(currentPosition.left, currentPosition.top);
+        el.hidden = false;
+
+        if (!elemBelow) return;
+
+        const droppableBelow = elemBelow.closest('.droppable');
+
+        if (currentDroppable !== droppableBelow) {
+          if (currentDroppable) {
+            if (binding.value && binding.value.onDragEnter && state) {
+              binding.value.onDragEnter(posDiff, currentPosition, event);
+            }
+          }
+          currentDroppable = droppableBelow;
+          if (currentDroppable) {
+            if (binding.value && binding.value.onDragLeave && state) {
+              binding.value.onDragLeave(posDiff, currentPosition, event);
+            }
+          }
+        }
+      }
 
       if (binding.value && binding.value.onPositionChange && state) {
         binding.value.onPositionChange(posDiff, currentPosition, event);
@@ -207,13 +234,26 @@ export const Draggable = {
       handlePositionChanged(event);
     }
 
-    function mouseUp() {
+    function mouseUp(event) {
       const currentRectPosition = getRectPosition();
       setState({
         initialMousePos: undefined,
         startDragPosition: currentRectPosition,
         currentDragPosition: currentRectPosition
       });
+
+      if (binding.value && binding.value.onDragEnd) {
+        el.hidden = true;
+        const elemBelow =
+          document.elementFromPoint(currentRectPosition.left, currentRectPosition.top);
+        el.hidden = false;
+
+        event.getRectPosition = getRectPosition;
+        event.dragElem = el;
+        event.setState = setState;
+
+        binding.value.onDragEnd(elemBelow, event);
+      }
 
       document.removeEventListener('mousemove', mouseMove);
       document.removeEventListener('mouseup', mouseUp);
@@ -235,6 +275,9 @@ export const Draggable = {
       el.removeEventListener('mousedown', el.listener);
       handler.setAttribute('draggable', 'true');
       handler.addEventListener('mousedown', mouseDown);
+      handler.addEventListener('dragstart', (e) => {
+        e.preventDefault();
+      });
       el.listener = mouseDown;
       initializeState();
       handlePositionChanged();

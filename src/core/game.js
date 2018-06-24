@@ -6,38 +6,31 @@
 
 import Ship from './ship';
 
-const ARRANGER = {
-  horrizontal: {
-    x: x => x,
-    y: y => ++y
-  },
-  vertical: {
-    x: x => --x,
-    y: y => y
-  }
-};
-
-const SHIP_TYPE = {
+export const SHIPS = {
   aircraftCarrier: {
+    name: 'aircraft-carrier',
     count: 1,
     bluePrint: {
       decker: 4
     }
   },
   battleship: {
+    name: 'battleship',
     count: 2,
     bluePrint: {
       decker: 3
     }
   },
   destroyer: {
+    name: 'destroyer',
     count: 3,
     bluePrint: {
       decker: 2
     }
   },
   cruiser: {
-    count: 4,
+    name: 'cruiser',
+    count: 5,
     bluePrint: {
       decker: 1
     }
@@ -52,19 +45,24 @@ class Game {
     this.createGrid(options);
   }
 
-  addShip({ type, coordinate, arrange }) {
-    const shipType = SHIP_TYPE[type];
+  addShip({ type, name, arrange }) {
+    const shipType = SHIPS[type];
     const { bluePrint } = shipType;
 
-    const position = this.getPosition(coordinate, ARRANGER[arrange], bluePrint.decker);
+    // const position = this.getPosition(coordinate, ARRANGER[arrange], bluePrint.decker);
 
     const ship = new Ship({
-      name: `${type}-${+new Date()}`,
+      type,
+      name,
       bluePrint,
-      position
+      arrange
     });
 
     this.ships.push(ship);
+  }
+
+  getShip(shipName) {
+    return this.ships.find(ship => ship.name === shipName);
   }
 
   fire(coordinate) {
@@ -104,7 +102,18 @@ class Game {
   }
 
   setup() {
-    // this.reset();
+    Object.keys(SHIPS).map((type) => {
+      const s = SHIPS[type];
+
+      for (let i = 0; i < s.count; i++) {
+        const name = `${s.name}-${i + 1}`;
+        this.addShip({
+          type,
+          name,
+          arrange: 'vertical'
+        });
+      }
+    });
   }
 
   createCoord(x, y) {

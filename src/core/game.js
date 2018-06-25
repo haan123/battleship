@@ -59,6 +59,8 @@ class Game {
     });
 
     this.ships.push(ship);
+
+    return ship;
   }
 
   getShip(shipName) {
@@ -113,6 +115,20 @@ class Game {
           arrange: 'vertical'
         });
       }
+    });
+  }
+
+  hookShip() {
+    const boardContainer = document.getElementById('board-container');
+    const containerRect = boardContainer.getBoundingClientRect();
+
+    this.ships.map((ship) => {
+      const shipElem = document.getElementById(ship.name);
+      const shipHook = document.getElementById(`hook-${ship.name}`);
+      const hookRect = shipHook.getBoundingClientRect();
+
+      shipElem.style.left = `${hookRect.left - containerRect.left}px`;
+      shipElem.style.top = `${hookRect.top - containerRect.top}px`;
     });
   }
 

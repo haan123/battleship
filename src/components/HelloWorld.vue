@@ -16,6 +16,10 @@
             </div>
           </div>
         </div>
+
+        <template v-for="ship in ships">
+          <div :key="ship.name" :id="ship.name" v-draggable="ship.draggable" :class="`ship ${ship.name}`" :data-ship-name="ship.name" ></div>
+        </template>
       </div>
 
       <div class="board" v-bind:style="{
@@ -36,7 +40,7 @@
 
       <div class="board board--baseship">
         <template v-for="ship in ships">
-          <div :key="ship.name" v-draggable="ship.draggable" :class="`ship ${ship.name}`" :data-ship-name="ship.name" ></div>
+          <div :key="ship.name" :id="`hook-${ship.name}`" :class="`ship-hook hook-${ship.name}`"></div>
         </template>
       </div>
     </div>
@@ -106,6 +110,7 @@ export default {
 
     const ships = this.game.ships.map((ship) => {
       ship.draggable = {
+        container: 'board-container',
         onDragEnd: this.dragEnd,
         resetInitialPos: false
       }
@@ -123,6 +128,7 @@ export default {
   },
 
   mounted() {
+    this.game.hookShip();
   },
 
   methods: {
@@ -138,13 +144,14 @@ export default {
       const shipName = event.dragElem.getAttribute('data-ship-name');
       const ship = this.game.getShip(shipName);
 
-      if (elem.closest('.droppable')) {
+      if (elem && elem.closest('.droppable')) {
         const cell = elem.getAttribute('data-cell');
         const coord = this.game.parseCoord(cell);
         const dragELemRect = event.getRectPosition();
         const dropElemWidth = elem.clientWidth;
         const dropElemHeight = elem.clientHeight;
         const dragElemWidth = event.dragElem.clientWidth;
+        const containerRect = event.getContainerRect();
 
         let dropELemRect = event.getRectPosition(elem);
 
@@ -161,8 +168,8 @@ export default {
 
         const dx = (elem.clientWidth / 2) - (event.dragElem.clientWidth / 2);
 
-        event.dragElem.style.left = `${dropELemRect.left + dx}px`;
-        event.dragElem.style.top = `${dropELemRect.top}px`;
+        event.dragElem.style.left = `${dropELemRect.relLeft + dx}px`;
+        event.dragElem.style.top = `${dropELemRect.relTop}px`;
 
         event.setState({
           initialMousePos: undefined,

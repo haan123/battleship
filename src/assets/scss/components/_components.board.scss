@@ -4,7 +4,13 @@
   flex-wrap: wrap;
 }
 
+.board {
+  margin: 0 auto;
+  overflow: auto;
+}
+
 .board--baseship {
+  position: relative;
   width: 400px;
   height: 400px;
   background: url("../../assets/base-ship.png");

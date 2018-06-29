@@ -1,0 +1,63 @@
+.sprite {
+  position: absolute;
+}
+
+.bomb {
+  width: 450px;
+  height: 50px;
+  background: url("../../assets/sprites/bomb.png");
+}
+
+.fire_opp {
+  width: 490px;
+  height: 70px;
+  background: url("../../assets/sprites/fire_opp.png");
+}
+
+.fire_aircraft_carrier {
+  width: 759px;
+  height: 180px;
+  background: url("../../assets/sprites/fire_aircraft_carrier.png");
+}
+
+.fire_aircraft_carrier_opp {
+  width: 759px;
+  height: 180px;
+  background: url("../../assets/sprites/fire_aircraft_carrier_opp.png");
+}
+
+.fire_battleship {
+  width: 759px;
+  height: 138px;
+  background: url("../../assets/sprites/fire_battleship.png");
+}
+
+.fire_battleship_opp {
+  width: 759px;
+  height: 138px;
+  background: url("../../assets/sprites/fire_battleship_opp.png");
+}
+
+.fire_cruiser {
+  width: 378px;
+  height: 45px;
+  background: url("../../assets/sprites/fire_cruiser.png");
+}
+
+.fire_cruiser_opp {
+  width: 378px;
+  height: 45px;
+  background: url("../../assets/sprites/fire_cruiser_opp.png");
+}
+
+.fire_destroyer {
+  width: 477px;
+  height: 85px;
+  background: url("../../assets/sprites/fire_destroyer.png");
+}
+
+.fire_destroyer_opp {
+  width: 477px;
+  height: 85px;
+  background: url("../../assets/sprites/fire_destroyer_opp.png");
+}

@@ -1,0 +1,19 @@
+.user-modal-container {
+  background-image: url("../../assets/banner.jpg");
+  background-size: cover;
+}
+
+.user-modal {
+  background: #eaf1f5 !important;
+
+  input {
+    background-color: #d2e9f5;
+    border: 2px solid #326e8d;
+
+    &:focus {
+      background-color: #d2e9f5;
+      border-color: inherit;
+      outline: none;
+    }
+  }
+}

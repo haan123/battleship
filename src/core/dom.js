@@ -62,6 +62,8 @@ dom.parents = (el, callback) => {
  * @return {String} newClass
  */
 dom.addClass = (elem, value) => {
+  if (!elem) return;
+
   if (elem.className.indexOf(value) !== -1) return;
 
   const current = `${elem.className} ${value}`;
@@ -76,6 +78,8 @@ dom.addClass = (elem, value) => {
  * @return {String} newClass
  */
 dom.removeClass = (elem, value) => {
+  if (!elem) return;
+
   const rclass = new RegExp(` ${value} `, 'g');
   const current = ` ${elem.className.trim()} `.replace(rclass, ' ');
 

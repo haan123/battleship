@@ -1,21 +1,14 @@
 <template>
-  <div id="user-config-modal" class="modal-container">
+  <div id="user-config-modal" class="modal-container user-modal-container">
     <div class="modal-background">
-      <div class="modal">
-        <div class="user">
+      <div class="modal user-modal">
+        <div class="user-modal__content">
           <div class="form-group">
-            <label class="user__ticker">Pick ticker:</label>
-            <div class="form-check form-check-inline">
-              <input id="inlineRadio1" v-bind:ref="rdX" class="form-check-input ticker-ipt" type="radio" name="ticker" value="x" checked>
-              <label class="form-check-label" for="inlineRadio1"><svgicon icon="x" width="16" height="16" color="#4f4b4f"></svgicon></label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input id="inlineRadio2" v-bind:ref="rdO" class="form-check-input ticker-ipt" type="radio" name="ticker" value="o">
-              <label class="form-check-label" for="inlineRadio2"><svgicon icon="o" width="16" height="16" color="#fb3e26"></svgicon></label>
-            </div>
+            <label for="user-name">Enter Your Name</label>
+            <input id="user-name" :ref="user" class="form-control" type="text" name="name" autocomplete="off">
           </div>
         </div>
-        <button v-on:click="start" class="btn btn-success user__start">Start</button>
+        <button v-on:click="setUser" class="btn btn-dark user__start">Play</button>
       </div>
     </div>
   </div>
@@ -33,47 +26,25 @@ import modal from '../core/modal';
 const socket = io(window.SOCKET_URL);
 
 export default {
-  props: ['caro'],
+  props: ['game'],
 
   data() {
     return {
-      rdX: 'rdX',
-      rdO: 'rdO'
+      user: 'user'
     };
   },
 
   methods: {
-    start() {
-      const ticker = this.$refs.rdX.checked ? 'x' : 'o';
-      const gameId = new Date().getTime();
+    setUser(e) {
+      const user = this.$refs.user.value;
+      localStorage.setItem('user', user);
 
-      this.caro.setup({
-        ticker,
-        gameId,
-        isMyTurn: true
-      });
-
-      socket.emit('setupGame', {
-        ticker,
-        gameId
-      });
+      this.game.setUser(user);
 
       modal.hideModal('user-config-modal');
-      modal.hideModal('modal-winner');
-      modal.hideModal('modal-loose');
+      // modal.hideModal('modal-winner');
+      // modal.hideModal('modal-loose');
     }
   }
 };
 </script>
-
-<style lang="scss">
-  .user__ticker {
-    vertical-align: middle;
-  }
-
-  .ticker-ipt {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-  }
-</style>

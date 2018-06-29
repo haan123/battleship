@@ -4,17 +4,6 @@
 /* eslint consistent-return: 0 */
 /* eslint array-callback-return: 0 */
 
-const ARRANGER = {
-  horrizontal: {
-    x: x => x,
-    y: y => --y
-  },
-  vertical: {
-    x: x => ++x,
-    y: y => y
-  }
-};
-
 class Ship {
   constructor(options) {
     const {
@@ -32,50 +21,14 @@ class Ship {
     this.arrange = arrange;
   }
 
-  createCoord(x, y) {
-    return `${x}:${y}`;
-  }
-
-  setPosition({ x, y }) {
-    const arrange = ARRANGER[this.arrange];
-    const { decker } = this;
-
-    const startPos = this.createCoord(x, y);
-    const pos = [startPos];
-
-    for (let i = 1; i < decker; i++) {
-      x = arrange.x(x);
-      y = arrange.y(y);
-
-      const nextCoor = this.createCoord(x, y);
-      pos.push(nextCoor);
-    }
-
-    this.position = pos.reverse();
-  }
-
-  getFired(coordinate) {
-    for (let i = 0; i < this.decker; i++) {
-      if (this.position[i] === coordinate) {
-        console.log(`${this.name} is hitted at ${coordinate}`);
-        this.setHit();
-        break;
-      }
-    }
+  setPosition(pos) {
+    this.position = pos;
   }
 
   buildShip(bluePrint) {
     Object.keys(bluePrint).map((prop) => {
       this[prop] = bluePrint[prop];
     });
-  }
-
-  setHit() {
-    this.damage++;
-  }
-
-  isDestroyed() {
-    return this.decker === this.damage;
   }
 }
 

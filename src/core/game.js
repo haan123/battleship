@@ -5,13 +5,30 @@
 /* eslint array-callback-return: 0 */
 
 import Ship from './ship';
+import Animate from './animate';
+
+const ARRANGER = {
+  horrizontal: {
+    x: x => x,
+    y: y => --y
+  },
+  vertical: {
+    x: x => ++x,
+    y: y => y
+  }
+};
 
 export const SHIPS = {
-  aircraftCarrier: {
+  aircraft_carrier: {
     name: 'aircraft-carrier',
     count: 1,
     bluePrint: {
       decker: 4
+    },
+    ext: {
+      numberOfFrames: 11,
+      dx: 0,
+      dy: 6
     }
   },
   battleship: {
@@ -19,6 +36,11 @@ export const SHIPS = {
     count: 2,
     bluePrint: {
       decker: 3
+    },
+    ext: {
+      numberOfFrames: 11,
+      dx: 0,
+      dy: 6
     }
   },
   destroyer: {
@@ -26,6 +48,11 @@ export const SHIPS = {
     count: 3,
     bluePrint: {
       decker: 2
+    },
+    ext: {
+      numberOfFrames: 9,
+      dx: 0,
+      dy: 6
     }
   },
   cruiser: {
@@ -33,16 +60,25 @@ export const SHIPS = {
     count: 5,
     bluePrint: {
       decker: 1
+    },
+    ext: {
+      numberOfFrames: 11,
+      dx: 0,
+      dy: 6
     }
   }
 };
 
-class Game {
+export class Game {
   constructor(options) {
     this.cells = {};
     this.ships = [];
 
     this.createGrid(options);
+  }
+
+  setUser(user) {
+    this.user = user;
   }
 
   addShip({ type, name, arrange }) {
@@ -67,21 +103,50 @@ class Game {
     return this.ships.find(ship => ship.name === shipName);
   }
 
-  fire(coordinate) {
+  fire(coordinate, elem, status) {
+    let config = {};
+    const { shipType } = status;
 
+    switch (status.name) {
+      case 'onTarget':
+        config = this.getCommonAnimateConfig('.fire_opp', 7, {
+          dx: -14,
+          dy: -16
+        });
+        break;
+      case 'destroyed':
+        config = this.getCommonAnimateConfig(`.fire_${shipType}_opp`, 11, SHIPS[shipType].bluePrint.decker);
+        break;
+      case 'hit':
+        break;
+      default:
+        config = this.getCommonAnimateConfig('.bomb', 9, {
+          dx: -5,
+          dy: -7
+        });
+    }
+
+    Animate.init({
+      elem,
+      ...config
+    });
   }
 
-  getFired(coordinate) {
-    this.ships.map((ship, index) => {
-      const { position } = ship;
+  getCommonAnimateConfig(imageName, numberOfFrames, ext) {
+    const spriteContainer = document.getElementById('sprite-container');
+    const image = spriteContainer.querySelector(imageName);
+    const imgWidth = image.clientWidth;
+    const frameWidth = imgWidth / numberOfFrames;
+    const frameHeight = image.clientHeight;
 
-      ship.getFired(coordinate);
-
-      if (ship.isDestroyed()) {
-        console.log(`${ship.name} is destroyed`);
-        this.ships.splice(index, 1);
-      }
-    });
+    return {
+      image,
+      imgWidth,
+      frameWidth,
+      frameHeight,
+      numberOfFrames,
+      ext
+    };
   }
 
   isLost() {
@@ -101,6 +166,24 @@ class Game {
     }
 
     return pos;
+  }
+
+  setPosition(ship, { x, y }) {
+    const arrange = ARRANGER[this.arrange];
+    const { decker } = this;
+
+    const startPos = this.createCoord(x, y);
+    const pos = [startPos];
+
+    for (let i = 1; i < decker; i++) {
+      x = arrange.x(x);
+      y = arrange.y(y);
+
+      const nextCoor = this.createCoord(x, y);
+      pos.push(nextCoor);
+    }
+
+    ship.setPosition(pos.reverse());
   }
 
   setup() {
@@ -152,11 +235,9 @@ class Game {
     for (let row = 0; row < rowNo; row++) {
       for (let col = 0; col < colNo; col++) {
         this.cells[`${row}:${col}`] = {
-          isFired: false
+          hasShipOn: false
         };
       }
     }
   }
 }
-
-export default Game;

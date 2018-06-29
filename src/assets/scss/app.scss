@@ -1,5 +1,8 @@
+@import 'components/components.modal';
 @import 'components/components.board';
 @import 'components/components.ship';
+@import 'components/components.sprite';
+@import 'components/components.user';
 
 body {
   background: #1f6fc5;
@@ -79,85 +82,7 @@ body {
   vertical-align: middle;
 }
 
-.user {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-.user__ticker {
-  margin-right: 5px;
-}
-
 .play {
-}
-
-.modal-container {
-  position:fixed;
-  display:table;
-  height:100%;
-  width:100%;
-  top:0;
-  left:0;
-  transform:scale(0);
-  z-index:1;
-
-  &.meep {
-    transform:scale(1);
-    .modal-background {
-      background:rgba(0,0,0,.0);
-      animation: fadeIn .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
-      .modal {
-        transform:translateX(-1500px);
-        animation: roadRunnerIn .3s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
-      }
-    }
-    &.out {
-      animation: quickScaleDown 0s .5s linear forwards;
-      .modal-background {
-        animation: fadeOut .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
-        .modal {
-          animation: roadRunnerOut .5s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
-        }
-      }
-    }
-  }
-  .modal-background {
-    display:table-cell;
-    background:rgba(0,0,0,.8);
-    text-align:center;
-    vertical-align:middle;
-    .modal {
-      background:white;
-      padding:16px;
-      display:inline-block;
-      border-radius:3px;
-      font-weight:300;
-      position:relative;
-      h2 {
-        font-size:25px;
-        line-height:25px;
-        margin-bottom:15px;
-      }
-      p {
-        font-size:18px;
-        line-height:22px;
-      }
-      .modal-svg {
-        position:absolute;
-        top:0;
-        left:0;
-        height:100%;
-        width:100%;
-        border-radius:3px;
-        rect {
-          stroke: #fff;
-          stroke-width: 2px;
-          stroke-dasharray: 778;
-          stroke-dashoffset: 778;
-        }
-      }
-    }
-  }
 }
 
 @keyframes fadeIn {

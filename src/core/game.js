@@ -7,15 +7,20 @@
 import Ship from './ship';
 import Animate from './animate';
 
-const ARRANGER = {
-  horrizontal: {
-    x: x => x,
-    y: y => --y
-  },
-  vertical: {
-    x: x => ++x,
-    y: y => y
-  }
+const COORDER = [
+  (x, y) => [--x, --y],
+  (x, y) => [--x, y],
+  (x, y) => [--x, ++y],
+  (x, y) => [x, --y],
+  (x, y) => [x, ++y],
+  (x, y) => [++x, --y],
+  (x, y) => [++x, y],
+  (x, y) => [++x, ++y],
+];
+
+export const ARRANGER = {
+  horrizontal: (x, y) => [x, --y],
+  vertical: (x, y) => [++x, y]
 };
 
 export const SHIPS = {
@@ -26,9 +31,22 @@ export const SHIPS = {
       decker: 4
     },
     ext: {
-      numberOfFrames: 11,
-      dx: 0,
-      dy: 6
+      oppDestroyed: {
+        numberOfFrames: 11,
+        dx: -15,
+        dy: -10
+      },
+      destroyed: {
+        numberOfFrames: 11,
+        dx: -15,
+        dy: -10
+      },
+      hit: {
+        numberOfFrames: 7,
+        dx: -14,
+        dy: -12
+      },
+      size: ''
     }
   },
   battleship: {
@@ -38,9 +56,22 @@ export const SHIPS = {
       decker: 3
     },
     ext: {
-      numberOfFrames: 11,
-      dx: 0,
-      dy: 6
+      oppDestroyed: {
+        numberOfFrames: 11,
+        dx: -14,
+        dy: -9
+      },
+      destroyed: {
+        numberOfFrames: 11,
+        dx: -15,
+        dy: -9
+      },
+      hit: {
+        numberOfFrames: 7,
+        dx: -6,
+        dy: -6
+      },
+      size: '_small'
     }
   },
   destroyer: {
@@ -50,21 +81,48 @@ export const SHIPS = {
       decker: 2
     },
     ext: {
+      oppDestroyed: {
+        numberOfFrames: 9,
+        dx: -8,
+        dy: -3
+      },
+      destroyed: {
+        numberOfFrames: 9,
+        dx: -8,
+        dy: -3
+      },
+      hit: {
+        numberOfFrames: 7,
+        dx: -7,
+        dy: -8
+      },
       numberOfFrames: 9,
-      dx: 0,
-      dy: 6
+      size: '_small'
     }
   },
   cruiser: {
     name: 'cruiser',
-    count: 5,
+    count: 4,
     bluePrint: {
       decker: 1
     },
     ext: {
-      numberOfFrames: 11,
-      dx: 0,
-      dy: 6
+      oppDestroyed: {
+        numberOfFrames: 7,
+        dx: -8,
+        dy: -3
+      },
+      destroyed: {
+        numberOfFrames: 7,
+        dx: -8,
+        dy: -3
+      },
+      hit: {
+        numberOfFrames: 7,
+        dx: 0,
+        dy: 6
+      },
+      size: '_small'
     }
   }
 };
@@ -73,8 +131,30 @@ export class Game {
   constructor(options) {
     this.cells = {};
     this.ships = [];
+    this.allCoords = [];
+    this.isPlayerReady = false;
 
     this.createGrid(options);
+  }
+
+  setTurn(user) {
+    this.turn = user;
+  }
+
+  isMyTurn() {
+    return this.user === this.turn;
+  }
+
+  isAllShipsReady() {
+    return !this.ships.find(ship => !ship.position || !ship.position.length);
+  }
+
+  isReady() {
+    return this.isPlayerReady;
+  }
+
+  ready(ready) {
+    this.isPlayerReady = ready;
   }
 
   setUser(user) {
@@ -105,22 +185,35 @@ export class Game {
 
   fire(coordinate, elem, status) {
     let config = {};
-    const { shipType } = status;
+    const { ship } = status;
+    const { ext } = SHIPS[ship.type] || {};
+    const { fireStatus } = status;
+    const animExt = ext && ext[fireStatus];
+    const { name, type } = ship;
 
-    switch (status.name) {
+    switch (fireStatus) {
       case 'onTarget':
-        config = this.getCommonAnimateConfig('.fire_opp', 7, {
+        config = this.getCommonAnimateConfig(name, '.fire_opp', {
+          numberOfFrames: 7,
           dx: -14,
           dy: -16
         });
         break;
+      case 'oppDestroyed':
+        config = this.getCommonAnimateConfig(name, `.fire_${type}_opp`, animExt);
+        this.clearAnimeImages(name);
+        break;
       case 'destroyed':
-        config = this.getCommonAnimateConfig(`.fire_${shipType}_opp`, 11, SHIPS[shipType].bluePrint.decker);
+        config = this.getCommonAnimateConfig(name, `.fire_${type}`, animExt);
+        this.clearAnimeImages(name);
+        this.hideShip(name);
         break;
       case 'hit':
+        config = this.getCommonAnimateConfig(name, `.fire_hole${ext.size}`, animExt);
         break;
       default:
-        config = this.getCommonAnimateConfig('.bomb', 9, {
+        config = this.getCommonAnimateConfig(name, '.bomb', {
+          numberOfFrames: 9,
           dx: -5,
           dy: -7
         });
@@ -132,25 +225,35 @@ export class Game {
     });
   }
 
-  getCommonAnimateConfig(imageName, numberOfFrames, ext) {
+  hideShip(name) {
+    const elem = document.getElementById(name);
+    elem.style.display = 'none';
+  }
+
+  clearAnimeImages(name) {
+    const elems = document.querySelectorAll(`.anime-image-${name}`);
+
+    elems.forEach((elem) => {
+      const parent = elem.parentNode;
+      parent.removeChild(elem);
+    });
+  }
+
+  getCommonAnimateConfig(shipName, imageName, ext) {
     const spriteContainer = document.getElementById('sprite-container');
     const image = spriteContainer.querySelector(imageName);
     const imgWidth = image.clientWidth;
-    const frameWidth = imgWidth / numberOfFrames;
+    const frameWidth = imgWidth / ext.numberOfFrames;
     const frameHeight = image.clientHeight;
 
     return {
       image,
+      shipName,
       imgWidth,
       frameWidth,
       frameHeight,
-      numberOfFrames,
       ext
     };
-  }
-
-  isLost() {
-    return !!this.ships.length;
   }
 
   getPosition(coordinate, arrange, decker) {
@@ -168,22 +271,55 @@ export class Game {
     return pos;
   }
 
+  isPosTooClose(pos, allCoords, oldPos = []) {
+    const nextByCoords = [pos[0]];
+
+    pos.map((c) => {
+      const { x: x1, y: y1 } = this.parseCoord(c);
+
+      COORDER.map((fn) => {
+        const [x, y] = fn(x1, y1);
+        const coord = this.createCoord(x, y);
+
+        if (c !== coord && nextByCoords.indexOf(coord) < 0 && oldPos.indexOf(coord) < 0) {
+          nextByCoords.push(coord);
+        }
+      });
+    });
+
+    return nextByCoords.find(coord => allCoords.indexOf(coord) !== -1);
+  }
+
+  resetAllCoords() {
+    this.allCoords = [];
+    this.ships.map(ship => ship.setPosition([]));
+  }
+
   setPosition(ship, { x, y }) {
-    const arrange = ARRANGER[this.arrange];
-    const { decker } = this;
+    const { decker, arrange, position } = ship;
+    const ar = ARRANGER[arrange];
 
     const startPos = this.createCoord(x, y);
     const pos = [startPos];
 
     for (let i = 1; i < decker; i++) {
-      x = arrange.x(x);
-      y = arrange.y(y);
+      [x, y] = ar(x, y);
 
       const nextCoor = this.createCoord(x, y);
       pos.push(nextCoor);
     }
 
+    const coords = this.allCoords.filter(coord => !position || position.indexOf(coord) < 0);
+
+    if (this.allCoords.length && this.isPosTooClose(pos, coords, position)) {
+      return false;
+    }
+
+    this.allCoords = [...coords, ...pos];
+
     ship.setPosition(pos.reverse());
+
+    return true;
   }
 
   setup() {

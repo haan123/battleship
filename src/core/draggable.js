@@ -127,14 +127,14 @@ export const Draggable = {
       el.style.top = `${state.currentDragPosition.relTop}px`;
     }
 
-    function initializeState(event) {
+    function initializeState(event, prevPos) {
       const state = getState();
       const initialRectPositionFromBinding =
         binding && binding.value && binding.value.initialPosition;
       const initialRectPositionFromState = state.initialPosition;
       const startingDragPosition = getRectPosition();
-      const initialPosition =
-        initialRectPositionFromBinding || initialRectPositionFromState || startingDragPosition;
+      const initialPosition = (prevPos && state.prevPosition)
+        || initialRectPositionFromBinding || initialRectPositionFromState || startingDragPosition;
 
       setState({
         initialPosition,
@@ -143,6 +143,10 @@ export const Draggable = {
         initialMousePos: getInitialMousePosition(event)
       });
       updateElementStyle();
+    }
+
+    function previousState(event) {
+      initializeState(event, true);
     }
 
     function handlePositionChanged(event) {
@@ -247,6 +251,11 @@ export const Draggable = {
 
     if (binding && binding.value && binding.value.resetInitialPos) {
       initializeState();
+      handlePositionChanged();
+    }
+
+    if (binding && binding.value && binding.value.resetPreviousPos) {
+      previousState();
       handlePositionChanged();
     }
 

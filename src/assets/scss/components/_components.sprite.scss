@@ -1,5 +1,13 @@
+.sprite-container {
+  position: absolute;
+  top: -1px;
+  visibility: hidden;
+  opacity: 0;
+}
+
 .sprite {
   position: absolute;
+  z-index: 1;
 }
 
 .bomb {
@@ -12,6 +20,18 @@
   width: 490px;
   height: 70px;
   background: url("../../assets/sprites/fire_opp.png");
+}
+
+.fire_hole {
+  width: 490px;
+  height: 70px;
+  background: url("../../assets/sprites/fire_hole.png");
+}
+
+.fire_hole_small {
+  width: 371px;
+  height: 53px;
+  background: url("../../assets/sprites/fire_hole_small.png");
 }
 
 .fire_aircraft_carrier {

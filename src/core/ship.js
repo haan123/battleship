@@ -21,6 +21,10 @@ class Ship {
     this.arrange = arrange;
   }
 
+  setArrange(arrange) {
+    this.arrange = arrange;
+  }
+
   setPosition(pos) {
     this.position = pos;
   }

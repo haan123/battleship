@@ -8,11 +8,11 @@ const Animate = {
   init(config) {
     const {
       elem,
+      shipName,
       image,
       imgWidth,
       frameWidth,
       frameHeight,
-      numberOfFrames,
       ext
     } = config;
 
@@ -23,19 +23,21 @@ const Animate = {
     clone.style.height = `${frameHeight}px`;
     clone.style.width = `${frameWidth}px`;
 
+    clone.className += ` anime-image-${shipName}`;
+
     const containerRect = boardContainer.getBoundingClientRect();
     const rect = elem.getBoundingClientRect();
 
     boardContainer.appendChild(clone);
 
-    clone.style.left = `${Math.floor((rect.left - containerRect.left) + ext.dx)}px`;
-    clone.style.top = `${Math.floor((rect.top - containerRect.top) + ext.dy)}px`;
+    clone.style.left = `${Math.floor((rect.left - containerRect.left) + (ext.dx || 0))}px`;
+    clone.style.top = `${Math.floor((rect.top - containerRect.top) + (ext.dy || 0))}px`;
 
     const obj = this.sprite({
       elem,
       image: clone,
       imgWidth,
-      numberOfFrames
+      numberOfFrames: ext.numberOfFrames
     });
 
     this.animate(obj);

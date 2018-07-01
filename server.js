@@ -8,7 +8,7 @@ const serveStatic = require('koa-better-static');
 // initialize the app
 const app = new Koa();
 const game = {
-  room1: []
+  room1: {}
 };
 
 app.use(convert(serveStatic(path.resolve(__dirname, 'dist'), {
@@ -31,8 +31,26 @@ app.use(views(path.resolve(__dirname, 'dist'), {
   }
 }));
 
-function getPlayer(user) {
-  return game.room1.find((client) => client.user === user);
+function getOppPlayer(players, user) {
+  return players.find((client) => client.user !== user);
+}
+
+function getPlayer(players, user) {
+  return players.find((client) => client.user === user);
+}
+
+function isWin(ships) {
+  return !ships.find(ship => ship.decker !== ship.damage);
+}
+
+function isAllPlayerReady(room) {
+  return room.length === 2;
+}
+
+function setNextPlayerTurn(room, players, player) {
+  const nextPlayer = players.find(p => p.user !== player.user);
+
+  room.turn = nextPlayer.user;
 }
 
 const router = new Router();
@@ -48,52 +66,98 @@ const io = require('socket.io')(app.listen(process.env.PORT || 3000, function() 
 }));
 
 io.on('connection', function (socket) {
-  socket.emit('data', { message: 'welcome to the chat' });
-
   socket.on('ready', function (data) {
-    console.log(`${data.user} is ready`)
+    console.log(`${data.user} is ready`);
 
     const keys = Object.keys(io.sockets.connected);
 
-    game.room1 = game.room1.filter((client) => {
-      return (keys.indexOf(client.sid) !== -1) && (data.user !== client.user);
+    if (!game.room1.players) game.room1.players = [];
+
+    const players = game.room1.players.filter((player) => {
+      return (keys.indexOf(player.sid) !== -1) && (data.user !== player.user);
     });
 
     data.sid = socket.id;
-    game.room1.push(data);
+    players.push(data);
+
+    const turn = players[0].user;
+
+    game.room1.turn = turn;
+    game.room1.players = players;
+
+    if (isAllPlayerReady(players)) {
+      io.sockets.emit('ready', {
+        turn
+      });
+    }
   });
 
   socket.on('fire', function (data) {
     console.log(`${data.user} is firing`);
 
-    const { cell, user } = data;
-    const player = getPlayer(user);
+    const { user } = data;
+    let { cell } = data;
+    const { room1 } = game;
+    const { players } = room1;
+    const player = getPlayer(players, user);
+    const oppPlayer = getOppPlayer(players, user);
 
-    if (!player) return;
+    if (!player || !oppPlayer) return;
 
-    const { ships } = player;
+    const { ships } = oppPlayer;
     const length = ships.length;
     let isMissed = true;
 
+    setNextPlayerTurn(room1, players, player);
+
     for (let i = 0; i < length; i++) {
       const ship = ships[i];
+      const { type, name, position, decker } = ship;
 
-      if (ship.position && ship.position.indexOf(cell) !== -1) {
-        game.room1.map((p) => {
-          ship.damage++;
+      if (position && position.indexOf(cell) !== -1) {
+        ship.damage++;
+        const isDestroyed = decker === ship.damage;
+        const hasWinner = isWin(ships);
 
-          const isDestroyed = ship.decker === ship.damage;
+        players.map((p) => {
+          const sock = io.sockets.connected[p.sid];
+
+          if (isDestroyed) {
+            cell = position[position.length - 1];
+          }
+
+          let fireData = {
+            currentTurn: user,
+            isDestroyed,
+            cell,
+            ship: {
+              type,
+              name
+            }
+          };
 
           if (p.sid === player.sid) {
+            fireData.fireStatus = 'onTarget';
+            fireData.nextTurn = user;
 
-            io.sockets.connected[p.sid].emit('onTarget', {
-              isDestroyed,
-              cell,
-              shipType: ship.type
-            });
+            if (isDestroyed) {
+              fireData.fireStatus = 'oppDestroyed';
+            }
           } else {
-            io.sockets.connected[p.sid].emit('hit');
+            fireData.fireStatus = 'hit';
+            fireData.nextTurn = user;
+
+            if (isDestroyed) {
+              fireData.fireStatus = 'destroyed';
+            }
           }
+
+          if (hasWinner) {
+            fireData.hasWinner = true;
+            fireData.winner = user;
+          }
+
+          sock.emit('fired', fireData);
         });
 
         isMissed = false;
@@ -103,19 +167,13 @@ io.on('connection', function (socket) {
     }
 
     if (isMissed) {
-      io.sockets.emit('miss', {
-        cell
+      io.sockets.emit('fired', {
+        currentTurn: user,
+        nextTurn: room1.turn,
+        cell,
+        fireStatus: 'miss',
+        ship: {}
       });
     }
-  });
-
-  socket.on('setupGame', function (data) {
-    console.log('setupGame', data);
-    io.sockets.emit('setupGame', data);
-  });
-
-  socket.on('setOtherWinningPath', function (data) {
-    console.log('setOtherWinningPath', data);
-    io.sockets.emit('setOtherWinningPath', data);
   });
 });

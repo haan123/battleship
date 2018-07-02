@@ -99,6 +99,10 @@ export default {
   },
 
   data() {
+    socket.on('newGame', (data) => {
+      this.newGame(null, true);
+    });
+
     socket.on('ready', (data) => {
       this.game.ready(true);
       this.game.setTurn(data.turn);
@@ -178,26 +182,27 @@ export default {
   mounted() {
     this.checkUser();
     this.game.hookShip();
+    this.game.ships.map(ship => this.resetPos(ship));
   },
 
   methods: {
-    newGame() {
+    newGame(e, isEmitted) {
       this.enableReadyButton = false;
       this.enableLazyButton = true;
 
-      // this.ships = this.game.ships.map((ship) => {
-      //   ship.draggable = {
-      //     container: 'board-container',
-      //     onDragEnd: this.dragEnd,
-      //     resetInitialPos: false,
-      //     resetPreviousPos: false
-      //   }
+      this.game.ships.map(ship => {
+        this.resetPos(ship);
+        this.game.clearAllAnimeImages();
+        this.game.showShip(ship.name);
+      });
 
-      //   return ship;
-      // });
+      this.game.ready(false);
 
-      // this.ready(false);
-      this.game.ships.map(ship => this.resetPos(ship));
+      if (!isEmitted) {
+        socket.emit('newGame', {
+          user: this.game.user
+        });
+      }
     },
 
     checkUser() {
@@ -247,7 +252,7 @@ export default {
         const isOverBound = c[0] + ship.decker > this.rowNo;
 
         if (isOverBound) {
-          ship.setPosition([]);
+          this.game.resetShipPos(ship);
         }
 
         return isOverBound;
@@ -291,6 +296,8 @@ export default {
     dragEnd(elem, event) {
       const shipName = event.dragElem.getAttribute('data-ship-name');
       const ship = this.game.getShip(shipName);
+      const targetShipName = elem.getAttribute('data-ship-name');
+      const targetShip = this.game.getShip(targetShipName);
 
       if (elem && elem.closest('.droppable')) {
         const dragElemWidth = event.dragElem.clientWidth;
@@ -322,7 +329,7 @@ export default {
 
         const isShipPlaced = this.game.setPosition(ship, coord);
 
-        if (isShipPlaced) {
+        if (elem && isShipPlaced) {
           this.placeShip(elem, event.dragElem, dropELemRect);
 
           event.setState({
@@ -342,11 +349,17 @@ export default {
           this.resetPos(ship);
         }
       } else {
-        this.resetPreviousPos(ship);
+        if (ship.position && ship.position.length && targetShip && targetShip.position && targetShip.position.length) {
+          this.resetPreviousPos(ship);
+        } else {
+          this.resetPos(ship);
+        }
       }
     },
 
     placeShip(cellElem, shipElem, rect) {
+      if (!cellElem || !shipElem) return;
+
       const dx = (cellElem.clientWidth / 2) - (shipElem.clientWidth / 2);
 
       shipElem.style.left = `${Math.floor(rect.relLeft + dx)}px`;
@@ -354,6 +367,8 @@ export default {
     },
 
     resetPos(ship) {
+      this.game.resetShipPos(ship);
+
       ship.draggable.resetInitialPos = true;
 
       setTimeout(() => {

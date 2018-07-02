@@ -43,6 +43,10 @@ function isWin(ships) {
   return !ships.find(ship => ship.decker !== ship.damage);
 }
 
+function isReadyToPlay(players) {
+  return !players.find(player => player.ready === false);
+}
+
 function isAllPlayerReady(room) {
   return room.length === 2;
 }
@@ -66,6 +70,20 @@ const io = require('socket.io')(app.listen(process.env.PORT || 3000, function() 
 }));
 
 io.on('connection', function (socket) {
+  socket.on('newGame', function (data) {
+    console.log(`${data.user} set up new game`);
+
+    const { user } = data;
+    const { players } = game.room1;
+    const oppPlayer = getOppPlayer(players, user);
+
+    players.map(player => {
+      player.ready = false;
+    });
+
+    io.sockets.connected[oppPlayer.sid].emit('newGame');
+  });
+
   socket.on('ready', function (data) {
     console.log(`${data.user} is ready`);
 
@@ -78,9 +96,14 @@ io.on('connection', function (socket) {
     });
 
     data.sid = socket.id;
+    data.ready = true;
     players.push(data);
 
-    const turn = players[0].user;
+    let turn;
+
+    if (isReadyToPlay(players)) {
+      turn = players[0].user;
+    }
 
     game.room1.turn = turn;
     game.room1.players = players;
@@ -93,7 +116,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('fire', function (data) {
-    console.log(`${data.user} is firing`);
+    console.log(`${data.user} fired`);
 
     const { user } = data;
     let { cell } = data;

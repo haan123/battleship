@@ -212,7 +212,7 @@ export class Game {
         config = this.getCommonAnimateConfig(name, `.fire_hole${ext.size}`, animExt);
         break;
       default:
-        config = this.getCommonAnimateConfig(name, '.bomb', {
+        config = this.getCommonAnimateConfig('bomb', '.bomb', {
           numberOfFrames: 9,
           dx: -5,
           dy: -7
@@ -230,6 +230,11 @@ export class Game {
     elem.style.display = 'none';
   }
 
+  showShip(name) {
+    const elem = document.getElementById(name);
+    elem.style.display = 'block';
+  }
+
   clearAnimeImages(name) {
     const elems = document.querySelectorAll(`.anime-image-${name}`);
 
@@ -237,6 +242,11 @@ export class Game {
       const parent = elem.parentNode;
       parent.removeChild(elem);
     });
+  }
+
+  clearAllAnimeImages() {
+    this.ships.map(ship => this.clearAnimeImages(ship.name));
+    this.clearAnimeImages('bomb');
   }
 
   getCommonAnimateConfig(shipName, imageName, ext) {
@@ -288,6 +298,12 @@ export class Game {
     });
 
     return nextByCoords.find(coord => allCoords.indexOf(coord) !== -1);
+  }
+
+  resetShipPos(ship) {
+    this.allCoords = this.allCoords.filter(coord => ship.position.indexOf(coord) < 0);
+
+    ship.setPosition([]);
   }
 
   resetAllCoords() {

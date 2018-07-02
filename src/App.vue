@@ -12,7 +12,7 @@
 /* eslint array-callback-return: 0 */
 
 if (process.env.NODE_ENV === 'production') {
-  window.SOCKET_URL = 'https://caro4fun.herokuapp.com';
+  window.SOCKET_URL = 'https://battleship4fun.herokuapp.com';
 } else {
   window.SOCKET_URL = 'http://localhost:3000';
 }

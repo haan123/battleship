@@ -5,14 +5,23 @@
 @import 'components/components.user';
 
 body {
-  background: #1f6fc5;
+  background: #717273;
+  background-image: url("https://www.transparenttextures.com/patterns/dust.png");
 }
+
+.mask {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+}
+
 .table {
-  margin: 0 auto;
   font-size: 25px;
   color: #E8104A;
 }
-
 
 .row {
   display: flex;
@@ -27,31 +36,6 @@ body {
       border-bottom: 0;
     }
   }
-}
-
-.col {
-  background: #6da1ae;
-  border-right: 1px solid #82eaee;
-  border-bottom: 1px solid #82eaee;
-  cursor: pointer;
-
-  &:last-child {
-    border-right: 0;
-  }
-
-  &:hover {
-    background: #618b96;
-  }
-
-  &.is-current,
-  &.is-win {
-    background: #618b96;
-  }
-}
-
-.alert {
-  margin-bottom: 0;
-  margin-left: 6px;
 }
 
 .widgets {
@@ -80,9 +64,6 @@ body {
 
 .svg-icon {
   vertical-align: middle;
-}
-
-.play {
 }
 
 @keyframes fadeIn {

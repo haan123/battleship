@@ -31,11 +31,11 @@ app.use(views(path.resolve(__dirname, 'dist'), {
   }
 }));
 
-function getOppPlayer(players, user) {
+function getOppPlayer(players = [], user) {
   return players.find((client) => client.user !== user);
 }
 
-function getPlayer(players, user) {
+function getPlayer(players = [], user) {
   return players.find((client) => client.user === user);
 }
 
@@ -44,11 +44,7 @@ function isWin(ships) {
 }
 
 function isReadyToPlay(players) {
-  return !players.find(player => player.ready === false);
-}
-
-function isAllPlayerReady(room) {
-  return room.length === 2;
+  return players.length === 2 && !players.find(player => player.ready === false);
 }
 
 function setNextPlayerTurn(room, players, player) {
@@ -77,6 +73,8 @@ io.on('connection', function (socket) {
     const { players } = game.room1;
     const oppPlayer = getOppPlayer(players, user);
 
+    if (!players || !players.length || !oppPlayer) return;
+
     players.map(player => {
       player.ready = false;
     });
@@ -100,17 +98,21 @@ io.on('connection', function (socket) {
     players.push(data);
 
     let turn;
+    const isReady = isReadyToPlay(players);
 
-    if (isReadyToPlay(players)) {
+    if (isReady) {
       turn = players[0].user;
     }
 
     game.room1.turn = turn;
     game.room1.players = players;
 
-    if (isAllPlayerReady(players)) {
+    if (isReady) {
+      const oppPlayer = getOppPlayer(players, data.user);
+
       io.sockets.emit('ready', {
-        turn
+        turn,
+        oppPlayer
       });
     }
   });

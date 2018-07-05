@@ -43,6 +43,19 @@ export const DraggableState = {
   initialMousePos: null
 };
 
+function getState(handler) {
+  return JSON.parse(handler.getAttribute('draggable-state')) || {};
+}
+
+export function setState(partialState, handler) {
+  const prevState = getState(handler);
+  const state = {
+    ...prevState,
+    ...partialState
+  };
+  handler.setAttribute('draggable-state', JSON.stringify(state));
+}
+
 function extractHandle(handle) {
   return handle && handle.$el;
 }
@@ -68,19 +81,6 @@ export const Draggable = {
       if (!container) return null;
 
       return container.getBoundingClientRect();
-    }
-
-    function getState() {
-      return JSON.parse(handler.getAttribute('draggable-state')) || {};
-    }
-
-    function setState(partialState) {
-      const prevState = getState();
-      const state = {
-        ...prevState,
-        ...partialState
-      };
-      handler.setAttribute('draggable-state', JSON.stringify(state));
     }
 
     function getRectPosition(elem) {
@@ -118,7 +118,7 @@ export const Draggable = {
     }
 
     function updateElementStyle() {
-      const state = getState();
+      const state = getState(handler);
       if (!state.currentDragPosition) {
         return;
       }
@@ -128,7 +128,7 @@ export const Draggable = {
     }
 
     function initializeState(event, config = {}) {
-      const state = getState();
+      const state = getState(handler);
       const initialRectPositionFromBinding =
         binding && binding.value && binding.value.initialPosition;
       const initialRectPositionFromState = state.initialPosition;
@@ -152,7 +152,7 @@ export const Draggable = {
         resetPosition,
         prevPosition: config.reset ? initialPosition : state.prevPosition,
         initialMousePos: getInitialMousePosition(event)
-      });
+      }, handler);
       updateElementStyle();
     }
 
@@ -169,7 +169,7 @@ export const Draggable = {
     }
 
     function handlePositionChanged(event) {
-      const state = getState();
+      const state = getState(handler);
       const posDiff = { x: 0, y: 0 };
       if (state.currentDragPosition && state.startDragPosition) {
         posDiff.x = state.currentDragPosition.relLeft - state.startDragPosition.relLeft;
@@ -214,10 +214,10 @@ export const Draggable = {
       if (stopDragging) {
         return;
       }
-      let state = getState();
+      let state = getState(handler);
       if (!state.startDragPosition || !state.initialMousePos) {
         initializeState(event);
-        state = getState();
+        state = getState(handler);
       }
 
       const dx = event.clientX - state.initialMousePos.left;
@@ -230,7 +230,7 @@ export const Draggable = {
         top: state.startDragPosition.top + dy
       };
 
-      setState({ currentDragPosition });
+      setState({ currentDragPosition }, handler);
       updateElementStyle();
       handlePositionChanged(event);
     }
@@ -241,7 +241,7 @@ export const Draggable = {
         initialMousePos: undefined,
         startDragPosition: currentRectPosition,
         currentDragPosition: currentRectPosition
-      });
+      }, handler);
 
       if (binding.value && binding.value.onDragEnd) {
         el.hidden = true;
@@ -250,9 +250,7 @@ export const Draggable = {
         el.hidden = false;
 
         event.getRectPosition = getRectPosition;
-        event.getContainerRect = getContainerRect;
         event.dragElem = el;
-        event.setState = setState;
 
         binding.value.onDragEnd(elemBelow, event);
       }
@@ -262,7 +260,7 @@ export const Draggable = {
     }
 
     function mouseDown(event) {
-      setState({ initialMousePos: getInitialMousePosition(event) });
+      setState({ initialMousePos: getInitialMousePosition(event) }, handler);
       handlePositionChanged(event);
       document.addEventListener('mousemove', mouseMove);
       document.addEventListener('mouseup', mouseUp);

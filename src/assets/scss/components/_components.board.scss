@@ -1,18 +1,116 @@
+.container {
+  overflow-x: auto;
+}
+
+.game-guide {
+  margin-bottom: 16px;
+  font-size: 18px;
+  text-align: left;
+}
+
 .board-container {
   position: relative;
-  display: flex;
-  flex-wrap: wrap;
+  width: 990px;
+  padding: 42px 0 64px 54px;
+  overflow-x: auto;
 }
 
 .board {
-  margin: 0 auto;
-  overflow: auto;
+  float: left;
 }
 
 .board--baseship {
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 424px;
+  height: 424px;
+  margin-left: 52px;
   background: url("../../assets/base_ship.png");
-  background-size: 400px 400px;
+  background-size: 424px 424px;
 }
+
+.board--act {
+  margin-left: 64px;
+}
+
+.board__map-col,
+.board__act-col {
+  cursor: pointer;
+  background: #6da1ae;
+  border-right: 1px solid #82eaee;
+  border-bottom: 1px solid #82eaee;
+
+  &:last-child {
+    border-right: 0;
+  }
+
+  &:hover {
+    background: #618b96;
+  }
+
+  &.is-current,
+  &.is-win {
+    background: #618b96;
+  }
+}
+
+.board__table {
+  position: relative;
+  margin-top: 12px;
+
+  &::before,
+  &::after {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    content: "";
+  }
+
+  &::before {
+    top: -12px;
+    right: -12px;
+    bottom: -12px;
+    left: -12px;
+    content: "";
+    border: 12px solid #737176;
+    border-radius: 6px;
+    box-shadow: 0 0 2px 1px rgba(0, 0, 0, 1),
+              0 0 2px 0 rgba(0, 0, 0, 1);
+  }
+
+  &::after {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: "";
+    border-radius: 2px;
+    box-shadow: 0 0 2px 1px rgba(0, 0, 0, .8);
+  }
+}
+
+  .board__letter,
+  .board__no {
+    width: 40px;
+    height: 40px;
+    color: #a8f2e8;
+    background: #667072;
+    border: 1px solid #48474c;
+    box-shadow: inset 1px 1px 6px rgba(200, 200, 200, .8);
+  }
+
+  .board__row-no {
+    position: absolute;
+    top: -53px;
+    z-index: 1;
+  }
+
+  .board__letter {
+    position: absolute;
+    left: -54px;
+    z-index: 1;
+  }
+
+  .board__letter--act {
+    right: -54px;
+    left: inherit;
+  }

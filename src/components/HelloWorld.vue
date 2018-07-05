@@ -6,17 +6,27 @@
       <button v-on:click="ready" class="btn btn-success btn-lg play ml-auto" :disabled="!this.enableReadyButton">Ready</button>
     </div>
 
-    <div id="board-container" class="board-container">
-      <div class="board" v-bind:style="{ width: `${40 * colNo}px` }">
-        <div class="table">
-          <div class="row" v-for="(_, row) in rowNo" :key="row">
-            <div class="droppable" v-for="(_, col) in colNo" :key="col" v-bind:ref="`map[${row}:${col}]`" :data-cell="`${row}:${col}`" v-bind:class="{
+    <p class="game-guide">Ships cannot occupy squares next to each other, horizontally, vertically or diagonally, you can place a ship by dragging the ship from the ship base.</p>
+
+    <div id="board-container" :class="{
+      'board-container': true,
+      'is-ready': game.isReady()
+    }">
+      <div class="board">
+        <div class="table board__table">
+          <div class="row board__row-no">
+            <div class="board__no col" v-for="(index, col) in colNo" :key="col">{{index}}</div>
+          </div>
+          <div class="row" v-for="(index, row) in rowNo" :key="row">
+            <div class="board__letter">{{letters[index - 1]}}</div>
+            <div class="droppable board__map-col" v-for="(_, col) in colNo" :key="col" v-bind:ref="`map[${row}:${col}]`" :data-cell="`${row}:${col}`" v-bind:class="{
               'col': true,
               'is-win': cells[`${row}:${col}`].isWin,
               'is-current': cells[`${row}:${col}`].isCurrent
             }" :title="`${row}:${col}`" style="width:40px;height:40px;">
             </div>
           </div>
+          <div v-if="!this.enableReadyButton" class="mask"></div>
         </div>
 
         <template v-for="ship in ships">
@@ -24,14 +34,20 @@
         </template>
       </div>
 
-      <div class="board" v-bind:style="{
+      <div class="board board--act" v-bind:style="{
         width: `${40 * colNo}px`,
         display: game.isReady() ? 'block' : 'none'
       }">
-        <div class="table">
-          <div class="row" v-for="(_, row) in rowNo" :key="row">
+        <div class="table board__table">
+          <div class="row board__row-no">
+            <div class="board__no col" v-for="(index, col) in colNo" :key="col">{{index}}</div>
+          </div>
+
+          <div class="row" v-for="(index, row) in rowNo" :key="row">
+            <div class="board__letter board__letter--act">{{letters[index - 1]}}</div>
             <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`act[${row}:${col}]`" v-on:click="fire" :data-cell="`${row}:${col}`" v-bind:class="{
                 'col': true,
+                'board__act-col': true,
                 'is-win': cells[`${row}:${col}`].isWin,
                 'is-current': cells[`${row}:${col}`].isCurrent
             }" :title="`${row}:${col}`" style="width:40px;height:40px;">
@@ -74,7 +90,7 @@
 /* eslint consistent-return: 0 */
 /* eslint array-callback-return: 0 */
 
-import { Draggable } from '../core/draggable';
+import { setState, Draggable } from '../core/draggable';
 import { SHIPS, ARRANGER, Game } from '../core/game';
 import WinnerModal from './WinnerModal';
 import LooseModal from './LooseModal';
@@ -85,6 +101,7 @@ import '../svg/x';
 import '../svg/o';
 
 const socket = io(window.SOCKET_URL);
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'J', 'H', 'I', 'J']
 
 export default {
   name: 'HelloWorld',
@@ -169,6 +186,7 @@ export default {
 
     return {
       game: this.game,
+      letters: LETTERS,
       rowNo,
       colNo,
       cells: this.game.cells,
@@ -263,8 +281,6 @@ export default {
       this.game.ships.map((ship) => {
         let c;
         let isShipPlaced;
-        const container = document.getElementById('board-container');
-        const containerRect = container.getBoundingClientRect();
 
         do {
           c = randomCoord();
@@ -278,12 +294,8 @@ export default {
 
           if (isShipPlaced) {
             const shipElem = this.getMapShip(ship.name);
-            const rect = cellElem.getBoundingClientRect();
 
-            this.placeShip(cellElem, shipElem, {
-              relLeft: rect.left - containerRect.left,
-              relTop: rect.top - containerRect.top
-            });
+            this.placeShip(cellElem, shipElem);
           }
         } while(!isShipPlaced || isShipOverBound(c, ship));
       });
@@ -303,7 +315,6 @@ export default {
         const dragElemWidth = event.dragElem.clientWidth;
         const dragElemHeight = event.dragElem.clientHeight;
         const dragELemRect = event.getRectPosition();
-        const containerRect = event.getContainerRect();
         const cell = elem.getAttribute('data-cell');
         const coord = this.game.parseCoord(cell);
         const dropElemWidth = elem.clientWidth;
@@ -325,19 +336,11 @@ export default {
         }
 
         elem = this.getMapCell(coord);
-        dropELemRect = event.getRectPosition(elem);
 
         const isShipPlaced = this.game.setPosition(ship, coord);
 
         if (elem && isShipPlaced) {
           this.placeShip(elem, event.dragElem, dropELemRect);
-
-          event.setState({
-            initialMousePos: undefined,
-            startDragPosition: dropELemRect,
-            currentDragPosition: dropELemRect,
-            prevPosition: dropELemRect
-          });
 
           if (this.game.isAllShipsReady()) {
             this.enableReadyButton = true;
@@ -357,13 +360,34 @@ export default {
       }
     },
 
-    placeShip(cellElem, shipElem, rect) {
+    placeShip(cellElem, shipElem) {
       if (!cellElem || !shipElem) return;
+
+      const container = document.getElementById('board-container');
+      const containerRect = container.getBoundingClientRect();
+
+      let { left, top } = cellElem.getBoundingClientRect();
 
       const dx = (cellElem.clientWidth / 2) - (shipElem.clientWidth / 2);
 
-      shipElem.style.left = `${Math.floor(rect.relLeft + dx)}px`;
-      shipElem.style.top = `${Math.floor(rect.relTop)}px`;
+      left += dx;
+
+      const dropELemRect = {
+        left,
+        top,
+        relLeft: left - containerRect.left,
+        relTop: top - containerRect.top
+      };
+
+      setState({
+        initialMousePos: undefined,
+        startDragPosition: dropELemRect,
+        currentDragPosition: dropELemRect,
+        prevPosition: dropELemRect
+      }, shipElem);
+
+      shipElem.style.left = `${Math.floor(dropELemRect.relLeft)}px`;
+      shipElem.style.top = `${Math.floor(dropELemRect.relTop)}px`;
     },
 
     resetPos(ship) {

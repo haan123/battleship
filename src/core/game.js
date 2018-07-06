@@ -193,7 +193,7 @@ export class Game {
 
     switch (fireStatus) {
       case 'onTarget':
-        config = this.getCommonAnimateConfig(name, '.fire_opp', {
+        config = this.getCommonAnimateConfig(`opp-${name}`, '.fire_opp', {
           numberOfFrames: 7,
           dx: -14,
           dy: -16
@@ -201,15 +201,15 @@ export class Game {
         break;
       case 'oppDestroyed':
         config = this.getCommonAnimateConfig(name, `.fire_${type}_opp`, animExt);
-        this.clearAnimeImages(name);
+        this.clearAnimeImages(`opp-${name}`);
         break;
       case 'destroyed':
         config = this.getCommonAnimateConfig(name, `.fire_${type}`, animExt);
-        this.clearAnimeImages(name);
+        this.clearAnimeImages(`hit-${name}`);
         this.hideShip(name);
         break;
       case 'hit':
-        config = this.getCommonAnimateConfig(name, `.fire_hole${ext.size}`, animExt);
+        config = this.getCommonAnimateConfig(`hit-${name}`, `.fire_hole${ext.size}`, animExt);
         break;
       default:
         config = this.getCommonAnimateConfig('bomb', '.bomb', {

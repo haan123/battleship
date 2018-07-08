@@ -19,7 +19,7 @@ const COORDER = [
 ];
 
 export const ARRANGER = {
-  horrizontal: (x, y) => [x, --y],
+  horizontal: (x, y) => [x, ++y],
   vertical: (x, y) => [++x, y]
 };
 
@@ -200,11 +200,11 @@ export class Game {
         });
         break;
       case 'oppDestroyed':
-        config = this.getCommonAnimateConfig(name, `.fire_${type}_opp`, animExt);
+        config = this.getCommonAnimateConfig(name, `.fire_${type}_opp${ship.arrange === 'horizontal' ? '_hor' : ''}`, animExt);
         this.clearAnimeImages(`opp-${name}`);
         break;
       case 'destroyed':
-        config = this.getCommonAnimateConfig(name, `.fire_${type}`, animExt);
+        config = this.getCommonAnimateConfig(name, `.fire_${type}${ship.arrange === 'horizontal' ? '_hor' : ''}`, animExt);
         this.clearAnimeImages(`hit-${name}`);
         this.hideShip(name);
         break;
@@ -223,6 +223,14 @@ export class Game {
       elem,
       ...config
     });
+  }
+
+  setArrange(ship, arrange) {
+    ship.setArrange(arrange);
+  }
+
+  rotate(ship) {
+    ship.rotate();
   }
 
   hideShip(name) {
@@ -252,16 +260,16 @@ export class Game {
   getCommonAnimateConfig(shipName, imageName, ext) {
     const spriteContainer = document.getElementById('sprite-container');
     const image = spriteContainer.querySelector(imageName);
-    const imgWidth = image.clientWidth;
-    const frameWidth = imgWidth / ext.numberOfFrames;
-    const frameHeight = image.clientHeight;
-
+    const isHorizontal = imageName.indexOf('hor') !== -1;
+    const frameWidth = isHorizontal ? image.clientWidth : image.clientWidth / ext.numberOfFrames;
+    const frameHeight = isHorizontal ? image.clientHeight / ext.numberOfFrames : image.clientHeight;
+console.log(isHorizontal)
     return {
       image,
       shipName,
-      imgWidth,
       frameWidth,
       frameHeight,
+      isHorizontal,
       ext
     };
   }

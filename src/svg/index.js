@@ -1,3 +1,2 @@
 /* eslint-disable */
-require('./o')
-require('./x')
+require('./rotate')

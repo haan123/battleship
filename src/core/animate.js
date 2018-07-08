@@ -10,9 +10,9 @@ const Animate = {
       elem,
       shipName,
       image,
-      imgWidth,
       frameWidth,
       frameHeight,
+      isHorizontal,
       ext
     } = config;
 
@@ -36,7 +36,7 @@ const Animate = {
     const obj = this.sprite({
       elem,
       image: clone,
-      imgWidth,
+      isHorizontal,
       numberOfFrames: ext.numberOfFrames
     });
 
@@ -46,8 +46,8 @@ const Animate = {
   sprite(options) {
     const {
       image,
-      imgWidth,
       loop,
+      isHorizontal,
       ticksPerFrame = 4,
       numberOfFrames = 1
     } = options;
@@ -77,7 +77,11 @@ const Animate = {
         }
 
         // Draw the animation
-        image.style.backgroundPosition = `-${(frameIndex * imgWidth) / numberOfFrames}px 0px`;
+        if (isHorizontal) {
+          image.style.backgroundPosition = `0px -${(frameIndex * image.clientHeight) / numberOfFrames}px`;
+        } else {
+          image.style.backgroundPosition = `-${(frameIndex * image.clientWidth) / numberOfFrames}px 0px`;
+        }
       }
     };
   },

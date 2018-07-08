@@ -137,7 +137,7 @@ io.on('connection', function (socket) {
 
     for (let i = 0; i < length; i++) {
       const ship = ships[i];
-      const { type, name, position, decker } = ship;
+      const { type, name, arrange, position, decker } = ship;
 
       if (position && position.indexOf(cell) !== -1) {
         ship.damage++;
@@ -157,7 +157,8 @@ io.on('connection', function (socket) {
             cell,
             ship: {
               type,
-              name
+              name,
+              arrange
             }
           };
 

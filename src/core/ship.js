@@ -25,6 +25,10 @@ class Ship {
     this.arrange = arrange;
   }
 
+  rotate() {
+    this.setArrange(this.arrange === 'horizontal' ? 'vertical' : 'horizontal');
+  }
+
   setPosition(pos) {
     this.position = pos;
   }

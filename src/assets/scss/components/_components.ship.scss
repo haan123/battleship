@@ -4,6 +4,13 @@
   background-repeat: no-repeat;
 }
 
+.ship__rotate {
+  position: absolute;
+  left: -22px;
+  bottom: 0;
+  cursor: pointer;
+}
+
 .ship-hook {
   position: absolute;
   width: 20px;
@@ -13,15 +20,48 @@
   background-size: contain;
 }
 
+.ship--horizontal {
+  &.aircraft-carrier-1 {
+    width: 160px;
+    height: 42px;
+    background-image: url("../../assets/aircraft_carrier_hor.png");
+  }
+
+  &.battleship-1,
+  &.battleship-2 {
+    width: 120px;
+    height: 38px;
+    background-image: url("../../assets/battleship_hor.png");
+  }
+
+  &.destroyer-1,
+  &.destroyer-2,
+  &.destroyer-3 {
+    width: 80px;
+    height: 26px;
+    background-image: url("../../assets/destroyer_hor.png");
+  }
+
+  &.cruiser-1,
+  &.cruiser-2,
+  &.cruiser-3,
+  &.cruiser-4,
+  &.cruiser-5 {
+    width: 42px;
+    height: 22px;
+    background-image: url("../../assets/cruiser_hor.png");
+  }
+}
+
 .aircraft-carrier-1 {
-  width: 41px;
+  width: 42px;
   height: 160px;
   background-image: url("../../assets/aircraft_carrier.png");
 }
 
 .battleship-1,
 .battleship-2 {
-  width: 37px;
+  width: 38px;
   height: 120px;
   background-image: url("../../assets/battleship.png");
 }
@@ -61,40 +101,35 @@
 
 .hook-destroyer-1 {
   top: 280px;
-  left: 246px;
+  left: 266px;
 }
 
 .hook-destroyer-2 {
   top: 180px;
-  left: 246px;
+  left: 266px;
 }
 
 .hook-destroyer-3 {
   top: 80px;
-  left: 246px;
+  left: 266px;
 }
 
 .hook-cruiser-1 {
   top: 320px;
-  left: 340px;
+  left: 362px;
 }
 
 .hook-cruiser-2 {
-  top: 258px;
-  left: 340px;
+  top: 238px;
+  left: 362px;
 }
 
 .hook-cruiser-3 {
-  top: 196px;
-  left: 340px;
+  top: 156px;
+  left: 362px;
 }
 
 .hook-cruiser-4 {
-  top: 134px;
-  left: 340px;
-}
-
-.hook-cruiser-5 {
-  top: 72px;
-  left: 340px;
+  top: 74px;
+  left: 362px;
 }

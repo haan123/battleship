@@ -23,8 +23,6 @@
 
 import modal from '../core/modal';
 
-const socket = io(window.SOCKET_URL);
-
 export default {
   props: ['game'],
 
@@ -35,15 +33,13 @@ export default {
   },
 
   methods: {
-    setUser(e) {
+    setUser() {
       const user = this.$refs.user.value;
       localStorage.setItem('user', user);
 
       this.game.setUser(user);
 
       modal.hideModal('user-config-modal');
-      // modal.hideModal('modal-winner');
-      // modal.hideModal('modal-loose');
     }
   }
 };

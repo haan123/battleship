@@ -1,5 +1,27 @@
 <template>
   <div class="container">
+    <div class="user-board">
+      <div :class="{
+        'user': true,
+        'badge': true,
+        'badge-warning': game.isReady() && game.isMyTurn,
+        'badge-dark': !game.isReady() || !game.isMyTurn
+      }">
+        {{game.user}}
+      </div>
+      <span v-bind:ref="arrow" class="arrow-icon" :style="{
+        'display': game.isReady() ? 'block' : 'none'
+      }">
+        <span class="left-bar"></span>
+        <span class="right-bar"></span>
+      </span>
+      <div :class="{
+        'user': true,
+        'badge': true,
+        'badge-warning': game.isReady() && !game.isMyTurn,
+        'badge-dark': !game.isReady() || game.isMyTurn
+      }">{{oppPlayer}}</div>
+    </div>
     <div class="widgets">
       <button @click="newGame" class="btn btn-danger btn-lg play">New Game</button>&nbsp;
       <button @click="lazy" class="btn btn-outline-secondary btn-lg play" :disabled="!this.enableLazyButton">Lazy</button>
@@ -105,6 +127,7 @@ import modal from '../core/modal';
 import dom from '../core/dom';
 
 import '../svg/rotate';
+import '../svg/edit';
 
 const socket = io(window.SOCKET_URL);
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'J', 'H', 'I', 'J'];
@@ -126,9 +149,24 @@ export default {
       this.newGame(null, true);
     });
 
+    socket.on('editUser', (data) => {
+      this.game.setUser(data.user);
+    });
+
     socket.on('ready', (data) => {
       this.game.ready(true);
       this.game.setTurn(data.turn);
+
+      document.title = document.title.replace(/\s?\([\w\W]+\)/g, '');
+      document.title += ` (${data.turn})`;
+
+      if (!this.game.isMyTurn) {
+        dom.addClass(this.$refs.arrow, 'open');
+        this.oppPlayer = data.turn;
+      } else {
+        dom.removeClass(this.$refs.arrow, 'open');
+        this.oppPlayer = data.oppPlayer;
+      }
     });
 
     socket.on('fired', (data) => {
@@ -156,6 +194,16 @@ export default {
         });
 
         this.game.setTurn(nextTurn);
+
+        document.title = document.title.replace(/\s?\([\w\W]+\)/g, '');
+
+        if (this.game.isMyTurn) {
+          dom.removeClass(this.$refs.arrow, 'open');
+          document.title += ` (${this.game.user})`;
+        } else {
+          dom.addClass(this.$refs.arrow, 'open');
+          document.title += ` (${this.oppPlayer})`;
+        }
 
         if (hasWinner) {
           if (winner === this.game.user) {
@@ -193,12 +241,15 @@ export default {
     return {
       game: this.game,
       letters: LETTERS,
+      arrow: 'arrow',
       rowNo,
       colNo,
       cells: this.game.cells,
       ships,
       enableReadyButton: false,
       enableLazyButton: true,
+      isMyTurn: this.game.isMyTurn,
+      oppPlayer: '(ᵔᴥᵔ)',
       shipTypes: Object.keys(SHIPS)
     };
   },
@@ -227,6 +278,10 @@ export default {
           user: this.game.user
         });
       }
+    },
+
+    editUser() {
+      modal.showModal('user-config-modal');
     },
 
     checkUser() {
@@ -462,7 +517,7 @@ export default {
       const cell = elem.getAttribute('data-cell');
       const { user } = this.game;
 
-      if (!this.game.isMyTurn()) {
+      if (!this.game.isMyTurn) {
         return;
       }
 

@@ -218,16 +218,19 @@ export class Game {
     this.ships = [];
     this.allCoords = [];
     this.isPlayerReady = false;
+    this.isMyTurn = false;
 
     this.createGrid(options);
   }
 
   setTurn(user) {
     this.turn = user;
-  }
 
-  isMyTurn() {
-    return this.user === this.turn;
+    if (this.user === this.turn) {
+      this.isMyTurn = true;
+    } else {
+      this.isMyTurn = false;
+    }
   }
 
   isAllShipsReady() {

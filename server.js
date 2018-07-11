@@ -110,11 +110,9 @@ io.on('connection', function (socket) {
     game.room1.players = players;
 
     if (isReady) {
-      const oppPlayer = getOppPlayer(players, data.user);
-
       io.sockets.emit('ready', {
         turn,
-        oppPlayer
+        oppPlayer: players[1].user
       });
     }
   });

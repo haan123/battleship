@@ -17,6 +17,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "forever": "^0.15.3",
     "koa": "^2.5.1",
     "koa-better-static": "^1.0.5",
     "koa-convert": "^1.2.0",

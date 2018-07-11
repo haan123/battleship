@@ -129,3 +129,10 @@
   height: 477px;
   background: url("../../assets/sprites/fire_destroyer_opp_hor.png");
 }
+
+.flame {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  border-radius: 50%;
+}

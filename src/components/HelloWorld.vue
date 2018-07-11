@@ -31,8 +31,8 @@
 
         <template v-for="ship in ships">
           <div :key="ship.name" :id="ship.name" v-draggable="ship.draggable" :data-ship-name="ship.name" :class="`ship ${ship.name}`">
-            <div @click="rotate">
-              <svgicon class="ship__rotate" icon="rotate" width="22" height="18" color="#f1f1f1" :key="`w${ship.name}`"></svgicon>
+            <div @click="rotate" v-if="ship.position && !!ship.position.length">
+              <svgicon class="ship__rotate" icon="rotate" width="22" height="18" color="#f1f1f1" :key="`w${ship.name}`">{{ship.draggable.resetInitialPos}}</svgicon>
             </div>
           </div>
         </template>
@@ -272,7 +272,7 @@ export default {
       const shipElem = this.getMapShip(ship.name);
       const cellElem = this.getMapCell(c);
 
-      const className = shipElem.className;
+      const { className } = shipElem;
 
       dom.removeClass(shipElem, ` ship--${ship.arrange}`);
       this.game.rotate(ship);
@@ -399,6 +399,7 @@ export default {
       if (ship.arrange === 'horizontal') {
         const dy = (cellElem.clientHeight / 2) - (shipElem.clientHeight / 2);
         top += dy;
+        left -= 1;
       } else {
         const dx = (cellElem.clientWidth / 2) - (shipElem.clientWidth / 2);
         left += dx;
@@ -423,7 +424,11 @@ export default {
     },
 
     resetPos(ship) {
+      const shipElem = this.getMapShip(ship.name);
       this.game.resetShipPos(ship);
+
+      dom.removeClass(shipElem, 'ship--horizontal');
+      dom.addClass(shipElem, 'ship--vertical');
 
       ship.draggable.resetInitialPos = true;
 

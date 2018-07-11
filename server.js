@@ -79,7 +79,9 @@ io.on('connection', function (socket) {
       player.ready = false;
     });
 
-    io.sockets.connected[oppPlayer.sid].emit('newGame');
+    if (io.sockets.connected[oppPlayer.sid]) {
+      io.sockets.connected[oppPlayer.sid].emit('newGame');
+    }
   });
 
   socket.on('ready', function (data) {

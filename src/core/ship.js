@@ -19,6 +19,7 @@ class Ship {
     this.name = name;
     this.damage = 0;
     this.arrange = arrange;
+    this.position = [];
   }
 
   setArrange(arrange) {
@@ -29,8 +30,13 @@ class Ship {
     this.setArrange(this.arrange === 'horizontal' ? 'vertical' : 'horizontal');
   }
 
+  resetPosition() {
+    this.position.splice(0);
+  }
+
   setPosition(pos) {
-    this.position = pos;
+    this.resetPosition();
+    pos.map(p => this.position.push(p));
   }
 
   buildShip(bluePrint) {

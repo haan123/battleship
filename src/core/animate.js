@@ -19,6 +19,8 @@ const Animate = {
 
     const boardContainer = document.getElementById('board-container');
     const clone = image.cloneNode(true);
+    const imgWidth = image.clientWidth;
+    const imgHeight = image.clientHeight;
 
     clone.style.height = `${frameHeight}px`;
     clone.style.width = `${frameWidth}px`;
@@ -36,6 +38,8 @@ const Animate = {
     const obj = this.sprite({
       elem,
       image: clone,
+      imgWidth,
+      imgHeight,
       isHorizontal,
       numberOfFrames: ext.numberOfFrames
     });
@@ -46,6 +50,8 @@ const Animate = {
   sprite(options) {
     const {
       image,
+      imgWidth,
+      imgHeight,
       loop,
       isHorizontal,
       ticksPerFrame = 4,
@@ -78,9 +84,9 @@ const Animate = {
 
         // Draw the animation
         if (isHorizontal) {
-          image.style.backgroundPosition = `0px -${(frameIndex * image.clientHeight) / numberOfFrames}px`;
+          image.style.backgroundPosition = `0px -${(frameIndex * imgHeight) / numberOfFrames}px`;
         } else {
-          image.style.backgroundPosition = `-${(frameIndex * image.clientWidth) / numberOfFrames}px 0px`;
+          image.style.backgroundPosition = `-${(frameIndex * imgWidth) / numberOfFrames}px 0px`;
         }
       }
     };

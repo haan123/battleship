@@ -6,6 +6,7 @@
 
 import Ship from './ship';
 import Animate from './animate';
+import Particle from './particle';
 
 const COORDER = [
   (x, y) => [--x, --y],
@@ -32,19 +33,40 @@ export const SHIPS = {
     },
     ext: {
       oppDestroyed: {
-        numberOfFrames: 11,
-        dx: -15,
-        dy: -10
+        horizontal: {
+          numberOfFrames: 11,
+          dx: -11,
+          dy: -15
+        },
+        vertical: {
+          numberOfFrames: 11,
+          dx: -15,
+          dy: -10
+        }
       },
       destroyed: {
-        numberOfFrames: 11,
-        dx: -15,
-        dy: -10
+        horizontal: {
+          numberOfFrames: 11,
+          dx: -11,
+          dy: -15
+        },
+        vertical: {
+          numberOfFrames: 11,
+          dx: -15,
+          dy: -10
+        }
       },
       hit: {
-        numberOfFrames: 7,
-        dx: -14,
-        dy: -12
+        horizontal: {
+          numberOfFrames: 7,
+          dx: -14,
+          dy: -12
+        },
+        vertical: {
+          numberOfFrames: 7,
+          dx: -14,
+          dy: -12
+        }
       },
       size: ''
     }
@@ -57,19 +79,40 @@ export const SHIPS = {
     },
     ext: {
       oppDestroyed: {
-        numberOfFrames: 11,
-        dx: -14,
-        dy: -9
+        horizontal: {
+          numberOfFrames: 11,
+          dx: -7,
+          dy: -15
+        },
+        vertical: {
+          numberOfFrames: 11,
+          dx: -14,
+          dy: -9
+        }
       },
       destroyed: {
-        numberOfFrames: 11,
-        dx: -15,
-        dy: -9
+        horizontal: {
+          numberOfFrames: 11,
+          dx: -7,
+          dy: -15
+        },
+        vertical: {
+          numberOfFrames: 11,
+          dx: -15,
+          dy: -9
+        }
       },
       hit: {
-        numberOfFrames: 7,
-        dx: -6,
-        dy: -6
+        horizontal: {
+          numberOfFrames: 7,
+          dx: -6,
+          dy: -6
+        },
+        vertical: {
+          numberOfFrames: 7,
+          dx: -6,
+          dy: -6
+        }
       },
       size: '_small'
     }
@@ -82,19 +125,40 @@ export const SHIPS = {
     },
     ext: {
       oppDestroyed: {
-        numberOfFrames: 9,
-        dx: -8,
-        dy: -3
+        horizontal: {
+          numberOfFrames: 9,
+          dx: -2,
+          dy: -7
+        },
+        vertical: {
+          numberOfFrames: 9,
+          dx: -8,
+          dy: -3
+        }
       },
       destroyed: {
-        numberOfFrames: 9,
-        dx: -8,
-        dy: -3
+        horizontal: {
+          numberOfFrames: 9,
+          dx: -2,
+          dy: -7
+        },
+        vertical: {
+          numberOfFrames: 9,
+          dx: -8,
+          dy: -3
+        }
       },
       hit: {
-        numberOfFrames: 7,
-        dx: -7,
-        dy: -8
+        horizontal: {
+          numberOfFrames: 7,
+          dx: -7,
+          dy: -8
+        },
+        vertical: {
+          numberOfFrames: 7,
+          dx: -7,
+          dy: -8
+        }
       },
       numberOfFrames: 9,
       size: '_small'
@@ -108,19 +172,40 @@ export const SHIPS = {
     },
     ext: {
       oppDestroyed: {
-        numberOfFrames: 7,
-        dx: -8,
-        dy: -3
+        horizontal: {
+          numberOfFrames: 7,
+          dx: 0,
+          dy: -7
+        },
+        vertical: {
+          numberOfFrames: 7,
+          dx: -7,
+          dy: -3
+        }
       },
       destroyed: {
-        numberOfFrames: 7,
-        dx: -8,
-        dy: -3
+        horizontal: {
+          numberOfFrames: 7,
+          dx: 0,
+          dy: -7
+        },
+        vertical: {
+          numberOfFrames: 7,
+          dx: -7,
+          dy: -3
+        }
       },
       hit: {
-        numberOfFrames: 7,
-        dx: 0,
-        dy: 6
+        horizontal: {
+          numberOfFrames: 7,
+          dx: 0,
+          dy: 6
+        },
+        vertical: {
+          numberOfFrames: 7,
+          dx: 0,
+          dy: 6
+        }
       },
       size: '_small'
     }
@@ -186,9 +271,10 @@ export class Game {
   fire(coordinate, elem, status) {
     let config = {};
     const { ship } = status;
+    const { arrange } = ship;
     const { ext } = SHIPS[ship.type] || {};
     const { fireStatus } = status;
-    const animExt = ext && ext[fireStatus];
+    const animExt = ext && ext[fireStatus] && ext[fireStatus][arrange];
     const { name, type } = ship;
 
     switch (fireStatus) {
@@ -198,18 +284,28 @@ export class Game {
           dx: -14,
           dy: -16
         });
+        this.createParticle({
+          elem,
+          name: `opp-${name}`
+        });
         break;
       case 'oppDestroyed':
-        config = this.getCommonAnimateConfig(name, `.fire_${type}_opp${ship.arrange === 'horizontal' ? '_hor' : ''}`, animExt);
+        config = this.getCommonAnimateConfig(name, `.fire_${type}_opp${arrange === 'horizontal' ? '_hor' : ''}`, animExt);
         this.clearAnimeImages(`opp-${name}`);
+        this.clearParticle(`opp-${name}`);
         break;
       case 'destroyed':
-        config = this.getCommonAnimateConfig(name, `.fire_${type}${ship.arrange === 'horizontal' ? '_hor' : ''}`, animExt);
+        config = this.getCommonAnimateConfig(name, `.fire_${type}${arrange === 'horizontal' ? '_hor' : ''}`, animExt);
         this.clearAnimeImages(`hit-${name}`);
+        this.clearParticle(`hit-${name}`);
         this.hideShip(name);
         break;
       case 'hit':
         config = this.getCommonAnimateConfig(`hit-${name}`, `.fire_hole${ext.size}`, animExt);
+        this.createParticle({
+          elem,
+          name: `hit-${name}`
+        });
         break;
       default:
         config = this.getCommonAnimateConfig('bomb', '.bomb', {
@@ -223,6 +319,15 @@ export class Game {
       elem,
       ...config
     });
+  }
+
+  createParticle(options) {
+    Particle.add(options);
+  }
+
+  clearParticle(name) {
+    this.clearAnime(`.flame-${name}`);
+    Particle.remove(name);
   }
 
   setArrange(ship, arrange) {
@@ -244,17 +349,21 @@ export class Game {
   }
 
   clearAnimeImages(name) {
-    const elems = document.querySelectorAll(`.anime-image-${name}`);
-
-    elems.forEach((elem) => {
-      const parent = elem.parentNode;
-      parent.removeChild(elem);
-    });
+    this.clearAnime(`.anime-image-${name}`);
   }
 
   clearAllAnimeImages() {
     this.ships.map(ship => this.clearAnimeImages(ship.name));
     this.clearAnimeImages('bomb');
+  }
+
+  clearAnime(query) {
+    const elems = document.querySelectorAll(query);
+
+    elems.forEach((elem) => {
+      const parent = elem.parentNode;
+      parent.removeChild(elem);
+    });
   }
 
   getCommonAnimateConfig(shipName, imageName, ext) {
@@ -263,7 +372,7 @@ export class Game {
     const isHorizontal = imageName.indexOf('hor') !== -1;
     const frameWidth = isHorizontal ? image.clientWidth : image.clientWidth / ext.numberOfFrames;
     const frameHeight = isHorizontal ? image.clientHeight / ext.numberOfFrames : image.clientHeight;
-console.log(isHorizontal)
+
     return {
       image,
       shipName,
@@ -311,12 +420,12 @@ console.log(isHorizontal)
   resetShipPos(ship) {
     this.allCoords = this.allCoords.filter(coord => ship.position.indexOf(coord) < 0);
 
-    ship.setPosition([]);
+    ship.resetPosition();
   }
 
   resetAllCoords() {
     this.allCoords = [];
-    this.ships.map(ship => ship.setPosition([]));
+    this.ships.map(ship => ship.resetPosition());
   }
 
   setPosition(ship, { x, y }) {

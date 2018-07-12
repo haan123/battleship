@@ -62,6 +62,8 @@ const Particle = {
   },
 
   remove(name) {
+    if (!this.parts) return;
+
     const keys = Object.keys(this.parts);
 
     keys.map((n) => {

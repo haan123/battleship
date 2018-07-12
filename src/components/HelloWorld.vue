@@ -7,7 +7,8 @@
         'badge-warning': game.isReady() && game.isMyTurn,
         'badge-dark': !game.isReady() || !game.isMyTurn
       }">
-        {{game.user}}
+        {{player}}
+        <span v-if="!game.isReady()" @click="editUser"><svgicon class="user__edit" icon="edit" width="12" height="12" color="#f1f1f1"></svgicon></span>
       </div>
       <span v-bind:ref="arrow" class="arrow-icon" :style="{
         'display': game.isReady() ? 'block' : 'none'
@@ -34,60 +35,62 @@
       'board-container': true,
       'is-ready': game.isReady()
     }">
-      <div class="board">
-        <div class="table board__table">
-          <div class="row board__row-no">
-            <div class="board__no col" v-for="(index, col) in colNo" :key="col">{{index}}</div>
-          </div>
-          <div class="row" v-for="(index, row) in rowNo" :key="row">
-            <div class="board__letter">{{letters[index - 1]}}</div>
-            <div class="droppable board__map-col" v-for="(_, col) in colNo" :key="col" v-bind:ref="`map[${row}:${col}]`" :data-cell="`${row}:${col}`" v-bind:class="{
-              'col': true,
-              'is-win': cells[`${row}:${col}`].isWin,
-              'is-current': cells[`${row}:${col}`].isCurrent
-            }" :title="`${row}:${col}`" style="width:40px;height:40px;">
+      <div class="board__inner">
+        <div class="board">
+          <div class="table board__table">
+            <div class="row board__row-no">
+              <div class="board__no col" v-for="(index, col) in colNo" :key="col">{{index}}</div>
             </div>
-          </div>
-          <div v-if="!this.enableReadyButton && !this.enableLazyButton" class="mask"></div>
-        </div>
-
-        <template v-for="ship in ships">
-          <div :key="ship.name" :id="ship.name" v-draggable="ship.draggable" :data-ship-name="ship.name" :class="`ship ${ship.name}`">
-            <div @click="rotate" v-if="ship.position && !!ship.position.length">
-              <svgicon class="ship__rotate" icon="rotate" width="22" height="18" color="#f1f1f1" :key="`w${ship.name}`">{{ship.draggable.resetInitialPos}}</svgicon>
-            </div>
-          </div>
-        </template>
-      </div>
-
-      <div class="board board--act" v-bind:style="{
-        width: `${40 * colNo}px`,
-        display: game.isReady() ? 'block' : 'none'
-      }">
-        <div class="table board__table">
-          <div class="row board__row-no">
-            <div class="board__no col" v-for="(index, col) in colNo" :key="col">{{index}}</div>
-          </div>
-
-          <div class="row" v-for="(index, row) in rowNo" :key="row">
-            <div class="board__letter board__letter--act">{{letters[index - 1]}}</div>
-            <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`act[${row}:${col}]`" @click="fire" :data-cell="`${row}:${col}`" v-bind:class="{
+            <div class="row" v-for="(index, row) in rowNo" :key="row">
+              <div class="board__letter">{{letters[index - 1]}}</div>
+              <div class="droppable board__map-col" v-for="(_, col) in colNo" :key="col" v-bind:ref="`map[${row}:${col}]`" :data-cell="`${row}:${col}`" v-bind:class="{
                 'col': true,
-                'board__act-col': true,
                 'is-win': cells[`${row}:${col}`].isWin,
                 'is-current': cells[`${row}:${col}`].isCurrent
-            }" :title="`${row}:${col}`" style="width:40px;height:40px;">
+              }" :title="`${row}:${col}`" style="width:40px;height:40px;">
+              </div>
+            </div>
+            <div v-if="!this.enableReadyButton && !this.enableLazyButton" class="mask"></div>
+          </div>
+
+          <template v-for="ship in ships">
+            <div :key="ship.name" :id="ship.name" v-draggable="ship.draggable" :data-ship-name="ship.name" :class="`ship ${ship.name}`">
+              <div @click="rotate" v-if="ship.position && !!ship.position.length">
+                <svgicon class="ship__rotate" icon="rotate" width="22" height="18" color="#f1f1f1" :key="`w${ship.name}`">{{ship.draggable.resetInitialPos}}</svgicon>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="board board--act" v-bind:style="{
+          width: `${40 * colNo}px`,
+          display: game.isReady() ? 'block' : 'none'
+        }">
+          <div class="table board__table">
+            <div class="row board__row-no">
+              <div class="board__no col" v-for="(index, col) in colNo" :key="col">{{index}}</div>
+            </div>
+
+            <div class="row" v-for="(index, row) in rowNo" :key="row">
+              <div class="board__letter board__letter--act">{{letters[index - 1]}}</div>
+              <div v-for="(_, col) in colNo" :key="col" v-bind:ref="`act[${row}:${col}]`" @click="fire" :data-cell="`${row}:${col}`" v-bind:class="{
+                  'col': true,
+                  'board__act-col': true,
+                  'is-win': cells[`${row}:${col}`].isWin,
+                  'is-current': cells[`${row}:${col}`].isCurrent
+              }" :title="`${row}:${col}`" style="width:40px;height:40px;">
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="board board--baseship" v-bind:style="{
-        display: !game.isReady() ? 'block' : 'none'
-      }">
-        <template v-for="ship in ships">
-          <div :key="ship.name" :id="`hook-${ship.name}`" :class="`ship-hook hook-${ship.name}`"></div>
-        </template>
+        <div class="board board--baseship" v-bind:style="{
+          display: !game.isReady() ? 'block' : 'none'
+        }">
+          <template v-for="ship in ships">
+            <div :key="ship.name" :id="`hook-${ship.name}`" :class="`ship-hook hook-${ship.name}`"></div>
+          </template>
+        </div>
       </div>
     </div>
 
@@ -250,6 +253,7 @@ export default {
       enableLazyButton: true,
       isMyTurn: this.game.isMyTurn,
       oppPlayer: '(ᵔᴥᵔ)',
+      player: '(ᵔᴥᵔ)',
       shipTypes: Object.keys(SHIPS)
     };
   },
@@ -292,6 +296,8 @@ export default {
       } else {
         this.game.setUser(user);
       }
+
+      this.player = this.game.user;
     },
 
     getMapCell(coord) {

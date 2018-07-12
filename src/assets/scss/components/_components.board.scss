@@ -10,9 +10,12 @@
 
 .board-container {
   position: relative;
-  width: 990px;
   padding: 42px 0 64px 54px;
   overflow-x: auto;
+}
+
+.board__inner {
+  width: 990px;
 }
 
 .board {

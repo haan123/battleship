@@ -249,6 +249,10 @@ export class Game {
     this.user = user;
   }
 
+  getUserName() {
+    return this.user.name;
+  }
+
   addShip({ type, name, arrange }) {
     const shipType = SHIPS[type];
     const { bluePrint } = shipType;
@@ -356,7 +360,12 @@ export class Game {
   }
 
   clearAllAnimeImages() {
-    this.ships.map(ship => this.clearAnimeImages(ship.name));
+    this.ships.map(({ name }) => {
+      this.clearAnimeImages(`opp-${name}`);
+      this.clearAnimeImages(`hit-${name}`);
+      this.clearParticle(`opp-${name}`);
+      this.clearParticle(`hit-${name}`);
+    });
     this.clearAnimeImages('bomb');
   }
 

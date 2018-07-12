@@ -39,6 +39,8 @@ export default {
 
       this.game.setUser(user);
 
+      this.$parent.checkUser();
+
       modal.hideModal('user-config-modal');
     }
   }

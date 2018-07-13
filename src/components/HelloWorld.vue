@@ -453,6 +453,7 @@ export default {
 
       const container = document.getElementById('board-container');
       const containerRect = container.getBoundingClientRect();
+      const containerScrollLeft = container.scrollLeft;
 
       const rect = cellElem.getBoundingClientRect();
       let { left, top } = rect;
@@ -469,7 +470,7 @@ export default {
       const dropELemRect = {
         left,
         top,
-        relLeft: Math.round(left - containerRect.left),
+        relLeft: Math.round(left - containerRect.left + containerScrollLeft),
         relTop: Math.round(top - containerRect.top)
       };
 

@@ -25,8 +25,8 @@
     </div>
     <div class="widgets">
       <button @click="newGame" class="btn btn-danger btn-lg play">New Game</button>&nbsp;
-      <button @click="lazy" class="btn btn-outline-secondary btn-lg play" :disabled="!this.enableLazyButton">Lazy</button>
-      <button @click="ready" class="btn btn-success btn-lg play ml-auto" :disabled="!this.enableReadyButton">Ready</button>
+      <button @click="lazy" class="btn btn-outline-secondary btn-lg play" :disabled="!enableLazyButton">Lazy</button>
+      <button @click="ready" class="btn btn-success btn-lg play ml-auto" :disabled="!enableReadyButton">Ready</button>
     </div>
 
     <p class="game-guide">Ships cannot occupy squares next to each other, horizontally, vertically or diagonally, you can place a ship by dragging the ship from the ship base.</p>
@@ -55,7 +55,7 @@
 
           <template v-for="ship in ships">
             <div :key="ship.name" :id="ship.name" v-draggable="ship.draggable" :data-ship-name="ship.name" :class="`ship ${ship.name}`">
-              <div @click="rotate" v-if="ship.position && !!ship.position.length">
+              <div @click="rotate" v-if="ship.position && ship.position.length && enableReadyButton">
                 <svgicon class="ship__rotate" icon="rotate" width="22" height="18" color="#f1f1f1" :key="`w${ship.name}`">{{ship.draggable.resetInitialPos}}</svgicon>
               </div>
             </div>

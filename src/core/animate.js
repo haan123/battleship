@@ -29,10 +29,11 @@ const Animate = {
 
     const containerRect = boardContainer.getBoundingClientRect();
     const rect = elem.getBoundingClientRect();
+    const containerScrollLeft = boardContainer.scrollLeft;
 
     boardContainer.appendChild(clone);
 
-    clone.style.left = `${Math.floor((rect.left - containerRect.left) + (ext.dx || 0))}px`;
+    clone.style.left = `${Math.floor(((rect.left - containerRect.left) + containerScrollLeft) + (ext.dx || 0))}px`;
     clone.style.top = `${Math.floor((rect.top - containerRect.top) + (ext.dy || 0))}px`;
 
     const obj = this.sprite({

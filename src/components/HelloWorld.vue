@@ -8,7 +8,7 @@
         'badge-dark': !game.isReady() || !game.isMyTurn
       }">
         {{player}}
-        <span v-if="!game.isReady()" @click="editUser"><svgicon class="user__edit" icon="edit" width="12" height="12" color="#f1f1f1"></svgicon></span>
+        <span v-if="!game.isReady()" @click="editUser"><svgicon class="user__edit" icon="pencil" width="14" height="14" color="#f1f1f1"></svgicon></span>
       </div>
       <span v-bind:ref="arrow" class="arrow-icon" :style="{
         'display': game.isReady() ? 'block' : 'none'
@@ -148,7 +148,6 @@ import modal from '../core/modal';
 import dom from '../core/dom';
 
 import '../svg/rotate';
-import '../svg/edit';
 import '../svg/twitter';
 import '../svg/facebook';
 import '../svg/pencil';

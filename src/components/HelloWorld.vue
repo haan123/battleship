@@ -108,6 +108,24 @@
       </template>
     </div>
 
+    <div class="footer">
+      <div class="github">
+        <a class="github-button" href="https://github.com/haan123/battleship" data-count-href="/haan123/battleship/stargazers" data-count-api="/repos/haan123/battleship#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star haan123/battleship on GitHub">Star</a>
+        <a class="github-button" href="https://github.com/haan123/battleship/fork" data-icon="octicon-repo-forked" data-count-href="/haan123/battleship/network" data-count-api="/repos/haan123/battleship#forks_count" data-count-aria-label="# forks on GitHub" aria-label="Fork haan123/battleship on GitHub">Fork</a>
+      </div>
+      <div class="social">
+        <span class="social-button social-button__tw"><a href="https://twitter.com/haquangngocan" target="_blank">
+          <svgicon class="" icon="twitter" width="18" height="18" color="#fff"></svgicon>
+        </a></span>
+        <span class="social-button"><a  href="https://www.facebook.com/hana.printle" target="_blank">
+          <svgicon icon="facebook" width="95" height="16" color="#fff"></svgicon>
+        </a></span>
+      </div>
+      <span class="made-with-heart">
+        <svgicon icon="pencil" width="16" height="16" color="#fff"></svgicon> with <svgicon icon="heart" width="16" height="16" color="#f1f1f1"></svgicon> by <a href="https://github.com/haan123" target="_blank" style="font-weight:500;color:#fff;">An Ha</a>
+      </span>
+    </div>
+
     <WinnerModal></WinnerModal>
     <LooseModal></LooseModal>
     <UserConfigModal v-bind:game="game"></UserConfigModal>
@@ -131,6 +149,10 @@ import dom from '../core/dom';
 
 import '../svg/rotate';
 import '../svg/edit';
+import '../svg/twitter';
+import '../svg/facebook';
+import '../svg/pencil';
+import '../svg/heart';
 
 const socket = io(window.SOCKET_URL);
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'J', 'H', 'I', 'J'];
@@ -470,7 +492,7 @@ export default {
       const dropELemRect = {
         left,
         top,
-        relLeft: Math.round(left - containerRect.left + containerScrollLeft),
+        relLeft: Math.round((left - containerRect.left) + containerScrollLeft),
         relTop: Math.round(top - containerRect.top)
       };
 

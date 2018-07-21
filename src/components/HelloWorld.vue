@@ -122,7 +122,7 @@
         </a></span>
       </div>
       <span class="made-with-heart">
-        <svgicon icon="pencil" width="16" height="16" color="#fff"></svgicon> with <svgicon icon="heart" width="16" height="16" color="#e82437"></svgicon> by <a href="https://github.com/haan123" target="_blank" style="font-weight:500;color:#fff;">An Ha</a>
+        <svgicon icon="pencil" width="16" height="16" color="#fff"></svgicon> with <svgicon icon="heart" width="16" height="16" color="#e82437"></svgicon> by <a href="https://github.com/haan123" target="_blank" style="font-weight:bold;color:#fff;">An Ha</a>
       </span>
     </div>
 

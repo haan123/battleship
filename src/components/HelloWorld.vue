@@ -237,6 +237,8 @@ export default {
           }
         }
       }
+
+      this.firing = false;
     });
 
     const rowNo = 10;
@@ -326,7 +328,7 @@ export default {
         coord = this.game.parseCoord(coord);
       }
 
-      const arr = this.$refs[`map[${this.game.createCoord(coord.x, coord.y)}]`];
+      const arr = this.$refs[`map[${this.game.createCoord(...coord)}]`];
 
       return arr && arr[0];
     },
@@ -336,7 +338,7 @@ export default {
         coord = this.game.parseCoord(coord);
       }
 
-      const arr = this.$refs[`act[${this.game.createCoord(coord.x, coord.y)}]`];
+      const arr = this.$refs[`act[${this.game.createCoord(...coord)}]`];
 
       return arr && arr[0];
     },
@@ -362,11 +364,24 @@ export default {
 
       const isShipPlaced = this.game.setPosition(ship, coord);
 
-      if (isShipPlaced) {
+      if (isShipPlaced && !this.isShipOverBound(coord, ship)) {
         this.placeShip(cellElem, shipElem, ship);
       } else {
+        this.game.rotate(ship);
+        this.game.setPosition(ship, coord)
         shipElem.className = className;
       }
+    },
+
+    isShipOverBound(coord, ship) {
+      const isOverBound =
+        (coord[0] + ship.decker > this.rowNo) || (coord[1] + ship.decker > this.colNo);
+
+      if (isOverBound) {
+        this.game.resetShipPos(ship);
+      }
+
+      return isOverBound;
     },
 
     lazy() {
@@ -378,15 +393,6 @@ export default {
       ];
 
       const randomArrange = () => arranger[Math.floor(Math.random() * 2)];
-      const isShipOverBound = (c, ship) => {
-        const isOverBound = (c[0] + ship.decker > this.rowNo) || (c[1] + ship.decker > this.colNo);
-
-        if (isOverBound) {
-          this.game.resetShipPos(ship);
-        }
-
-        return isOverBound;
-      };
 
       this.game.resetAllCoords();
 
@@ -410,7 +416,7 @@ export default {
           if (isShipPlaced) {
             this.placeShip(cellElem, shipElem, ship);
           }
-        } while (!isShipPlaced || isShipOverBound(c, ship));
+        } while (!isShipPlaced || this.isShipOverBound(c, ship));
       });
 
       if (this.game.isAllShipsReady()) {
@@ -424,6 +430,10 @@ export default {
       const targetShipName = elem.getAttribute('data-ship-name');
       const targetShip = this.game.getShip(targetShipName);
 
+      if (event.target.closest('.ship__rotate')) {
+        return;
+      }
+
       if (elem && elem.closest('.droppable')) {
         const dragELemRect = event.getRectPosition();
         const cell = elem.getAttribute('data-cell');
@@ -434,14 +444,14 @@ export default {
         const dropELemRect = event.getRectPosition(elem);
 
         if ((dragELemRect.left - dropELemRect.left) / dropElemWidth > 0.7) {
-          coord.y += 1;
+          coord[1] += 1;
         }
 
         if ((dragELemRect.top - dropELemRect.top) / dropElemHeight > 0.7) {
-          coord.x += 1;
+          coord[0] += 1;
         }
 
-        if (coord.x + ship.decker > this.rowNo) {
+        if (coord[0] + ship.decker > this.rowNo) {
           this.resetPreviousPos(ship);
           return;
         }
@@ -545,9 +555,11 @@ export default {
       const cell = elem.getAttribute('data-cell');
       const { user } = this.game;
 
-      if (!this.game.isMyTurn) {
+      if (this.firing || !this.game.isMyTurn) {
         return;
       }
+
+      this.firing = true;
 
       socket.emit('fire', {
         user,

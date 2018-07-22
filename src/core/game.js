@@ -396,7 +396,7 @@ export class Game {
   }
 
   getPosition(coordinate, arrange, decker) {
-    let { x, y } = this.parseCoord(coordinate);
+    let [x, y] = this.parseCoord(coordinate);
     const pos = [coordinate];
 
     for (let i = 1; i < decker; i++) {
@@ -414,7 +414,7 @@ export class Game {
     const nextByCoords = [pos[0]];
 
     pos.map((c) => {
-      const { x: x1, y: y1 } = this.parseCoord(c);
+      const [x1, y1] = this.parseCoord(c);
 
       COORDER.map((fn) => {
         const [x, y] = fn(x1, y1);
@@ -440,7 +440,7 @@ export class Game {
     this.ships.map(ship => ship.resetPosition());
   }
 
-  setPosition(ship, { x, y }) {
+  setPosition(ship, [x, y]) {
     const { decker, arrange, position } = ship;
     const ar = ARRANGER[arrange];
 
@@ -448,10 +448,13 @@ export class Game {
     const pos = [startPos];
 
     for (let i = 1; i < decker; i++) {
-      [x, y] = ar(x, y);
+      const [x1, y1] = ar(x, y);
 
-      const nextCoor = this.createCoord(x, y);
+      const nextCoor = this.createCoord(x1, y1);
       pos.push(nextCoor);
+
+      x = x1;
+      y = y1;
     }
 
     const coords = this.allCoords.filter(coord => !position || position.indexOf(coord) < 0);
@@ -501,15 +504,9 @@ export class Game {
   }
 
   parseCoord(coordinate) {
-    let [x, y] = coordinate.split(':');
+    const [x, y] = coordinate.split(':');
 
-    x = +x;
-    y = +y;
-
-    return {
-      x,
-      y
-    };
+    return [+x, +y];
   }
 
   createGrid({ rowNo, colNo }) {
